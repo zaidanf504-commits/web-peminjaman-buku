@@ -63,395 +63,306 @@ if (isset($_POST['register'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar — Digital Library</title>
+    <title>Daftar Akun — Digital Library</title>
+    
+    <!-- Tailwind CSS 3 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Three.js CDN untuk Animasi 3D Interaktif -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root {
-            --brand: #0052CC;
-            --brand-dark: #0747A6;
-            --brand-deep: #092E75;
-            --brand-mid: #4C9AFF;
-            --brand-light: #DEEBFF;
-            --ink: #172B4D;
-            --ink-2: #42526E;
-            --muted: #5E6C84;
-            --line: #DFE1E6;
-            --line-soft: #EBECF0;
-            --bg: #F4F5F7;
-            --bg-soft: #FAFBFC;
-
-            --danger: #BF2600;
-            --danger-bg: #FFEBE6;
-            --danger-line: #FFBDAD;
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030303;
+            color: #f8fafc;
         }
 
-        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-
-        html, body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            color: var(--ink);
-            background: var(--bg);
-            min-height: 100%;
+        /* Glassmorphism Ultra Transparent Style */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-        @keyframes blobFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33%      { transform: translate(4%, -3%) scale(1.05); }
-            66%      { transform: translate(-3%, 4%) scale(0.97); }
-        }
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            20%     { transform: translateX(-6px); }
-            40%     { transform: translateX(6px); }
-            60%     { transform: translateX(-4px); }
-            80%     { transform: translateX(4px); }
-        }
-
-        .page-enter  { animation: fadeIn .35s ease-out both; }
-        .col-form    { animation: fadeUp .55s cubic-bezier(.2,.8,.2,1) both; }
-        .col-visual  { animation: fadeUp .65s cubic-bezier(.2,.8,.2,1) .1s both; }
-
-        .stagger > * { animation: fadeUp .5s cubic-bezier(.2,.8,.2,1) both; }
-        .stagger > *:nth-child(1) { animation-delay: .10s; }
-        .stagger > *:nth-child(2) { animation-delay: .16s; }
-        .stagger > *:nth-child(3) { animation-delay: .22s; }
-        .stagger > *:nth-child(4) { animation-delay: .28s; }
-        .stagger > *:nth-child(5) { animation-delay: .34s; }
-        .stagger > *:nth-child(6) { animation-delay: .40s; }
-        .stagger > *:nth-child(7) { animation-delay: .46s; }
-        .stagger > *:nth-child(8) { animation-delay: .52s; }
-        .stagger > *:nth-child(9) { animation-delay: .58s; }
-
-        .page-exit {
-            animation: pageExit .38s cubic-bezier(.4,0,1,1) both;
-            pointer-events: none;
-        }
-        @keyframes pageExit {
-            from { opacity: 1; transform: translateX(0); }
-            to   { opacity: 0; transform: translateX(24px); }
-        }
-
-        .shake { animation: shake .4s ease-in-out; }
-
-        /* Blob visual */
-        .blob-wrap {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            background:
-                radial-gradient(circle at 30% 20%, #4C9AFF 0%, transparent 45%),
-                radial-gradient(circle at 70% 80%, #0747A6 0%, transparent 50%),
-                radial-gradient(circle at 20% 90%, #092E75 0%, transparent 55%),
-                linear-gradient(150deg, #0052CC 0%, #0747A6 55%, #092E75 100%);
-        }
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: .55;
-            animation: blobFloat 18s ease-in-out infinite;
-        }
-        .blob-1 { width: 55%; height: 55%; top: 6%;  left: -6%;  background: radial-gradient(circle, #B3D4FF 0%, transparent 70%); }
-        .blob-2 { width: 60%; height: 60%; top: 40%; right: -10%; background: radial-gradient(circle, #4C9AFF 0%, transparent 70%); animation-delay: -6s; }
-        .blob-3 { width: 45%; height: 45%; bottom: -8%; left: 15%; background: radial-gradient(circle, #0052CC 0%, transparent 70%); animation-delay: -12s; }
-
-        .blob-wrap::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            opacity: .16;
-            mix-blend-mode: overlay;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
-
-        /* Field */
-        .field {
+        .input-clean {
             width: 100%;
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            color: var(--ink);
-            font-size: 13px;
-            padding: 10px 13px;
-            transition: border-color .15s ease, box-shadow .15s ease;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 11px 16px 11px 40px;
+            font-size: 13.5px;
+            color: #ffffff;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .field::placeholder { color: #A5ADBA; }
-        .field:focus {
+        .input-clean::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .input-clean:focus {
             outline: none;
-            border-color: var(--brand);
-            box-shadow: 0 0 0 3px rgba(0,82,204,.14);
-        }
-        .field-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--ink-2);
-            margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
         }
 
-        .btn-primary-lg {
+        /* Micro Entrance Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        #canvas3d-container {
             width: 100%;
-            background: var(--brand);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            padding: 12px 16px;
-            border-radius: 10px;
-            transition: background .15s ease, transform .1s ease;
-            letter-spacing: .01em;
-        }
-        .btn-primary-lg:hover { background: var(--brand-dark); }
-        .btn-primary-lg:active { transform: translateY(1px); }
-
-        /* Back link */
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--muted);
-            transition: color .15s ease, transform .15s ease;
-        }
-        .back-link:hover {
-            color: var(--brand);
-            transform: translateX(-2px);
-        }
-
-        /* Password strength */
-        .strength-bar {
-            height: 3px;
-            border-radius: 2px;
-            transition: width .3s ease, background .3s ease;
-            background: var(--line);
-        }
-
-        /* Grid layout */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-        .form-grid > .full { grid-column: 1 / -1; }
-        @media (max-width: 480px) {
-            .form-grid { grid-template-columns: 1fr; }
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #C1C7D0; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #A5ADBA; }
-
-        a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
-            outline: 2px solid var(--brand);
-            outline-offset: 2px;
-            border-radius: 6px;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: auto;
         }
     </style>
 </head>
-<body class="page-enter">
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
 
-    <div class="min-h-screen w-full flex items-center justify-center p-4 lg:p-8">
+    <!-- Video Background & Dark Overlay -->
+    <video 
+      autoplay 
+      loop 
+      muted 
+      playsinline 
+      class="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none"
+      src="https://www.pexels.com/download/video/16839128/">
+    </video>
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-[1px] z-0 pointer-events-none"></div>
 
-        <div class="w-full max-w-[1000px] bg-white rounded-2xl shadow-[0_1px_2px_rgba(9,30,66,.08),0_20px_48px_-16px_rgba(9,30,66,.16)] overflow-hidden">
-            <div class="grid grid-cols-1 md:grid-cols-[1.15fr_1fr] md:min-h-[640px]">
+    <!-- Main Card Container -->
+    <div class="w-full max-w-4xl relative z-10 animate-fade-in my-6">
+        <div class="glass-card rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[620px]">
 
-                <!-- ================= KIRI: FORM ================= -->
-                <div class="col-form p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
-
-                    <!-- Back link -->
-                    <a href="landing.php" class="back-link mb-6" data-direction="back">
-                        <i class="fas fa-arrow-left text-[10px]"></i>
-                        <span>Kembali ke beranda</span>
-                    </a>
-
-                    <!-- Brand -->
-                    <div class="flex items-center gap-3 mb-7">
-                        <img src="logo/logo.png" alt="Digital Library" class="h-10 object-contain">
-                        <span class="text-[12px] font-semibold uppercase tracking-[0.16em]" style="color: var(--muted);">
-                            Digital Library
+            <!-- ================= KIRI: FORM REGISTER ================= -->
+            <div class="md:col-span-7 p-8 sm:p-11 flex flex-col justify-between bg-white/5 backdrop-blur-md">
+                <div>
+                    <!-- Navigation / Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <a href="landing.php" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-300 hover:text-white transition-colors group">
+                            <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                            <span>Beranda</span>
+                        </a>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Akun Baru
                         </span>
                     </div>
 
-                    <h1 class="text-[30px] sm:text-[34px] font-extrabold leading-[1.1] tracking-tight mb-2" style="color: var(--ink);">
-                        Buat akun baru.
-                    </h1>
-                    <p class="text-[13px] leading-relaxed mb-7" style="color: var(--muted);">
-                        Isi data di bawah untuk mulai meminjam buku dari katalog perpustakaan kami.
-                    </p>
+                    <!-- Title -->
+                    <div class="mb-6">
+                        <div class="inline-flex items-center gap-2 text-brand-400 font-bold text-sm mb-1.5">
+                            <i class="fas fa-book-open"></i>
+                            <span>Digital Library</span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Buat Akun Anda</h1>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">Lengkapi data untuk meminjam buku secara instant.</p>
+                    </div>
 
+                    <!-- Error Alert -->
                     <?php if (!empty($message)): ?>
-                        <div id="errorBox" class="shake flex items-start gap-2.5 px-3.5 py-2.5 rounded-lg border text-[13px] mb-5"
-                             style="background: var(--danger-bg); border-color: var(--danger-line); color: var(--danger);">
-                            <i class="fas fa-circle-exclamation mt-0.5 text-[12px]"></i>
-                            <span class="font-medium"><?= htmlspecialchars($message); ?></span>
+                        <div class="animate-shake flex items-center gap-3 p-3.5 mb-5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-200 text-xs backdrop-blur-md">
+                            <i class="fas fa-exclamation-circle text-rose-400 text-base flex-shrink-0"></i>
+                            <div><?= htmlspecialchars($message); ?></div>
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="" class="stagger form-grid" id="registerForm">
-
-                        <div class="full">
-                            <label for="namalengkap" class="field-label">Nama Lengkap <span style="color: var(--danger);">*</span></label>
-                            <input type="text" name="namalengkap" id="namalengkap" required
-                                   autocomplete="name"
-                                   placeholder="cth: Zaidan Faiz"
-                                   value="<?= htmlspecialchars($old['namalengkap']); ?>"
-                                   class="field">
-                        </div>
-
+                    <!-- Form -->
+                    <form method="POST" action="" class="space-y-3.5">
+                        
+                        <!-- Nama Lengkap -->
                         <div>
-                            <label for="username" class="field-label">Username <span style="color: var(--danger);">*</span></label>
-                            <input type="text" name="username" id="username" required
-                                   autocomplete="username"
-                                   placeholder="cth: zaidan"
-                                   value="<?= htmlspecialchars($old['username']); ?>"
-                                   class="field">
-                        </div>
-
-                        <div>
-                            <label for="email" class="field-label">Email <span style="color: var(--danger);">*</span></label>
-                            <input type="email" name="email" id="email" required
-                                   autocomplete="email"
-                                   placeholder="nama@email.com"
-                                   value="<?= htmlspecialchars($old['email']); ?>"
-                                   class="field">
-                        </div>
-
-                        <div class="full">
-                            <label for="alamat" class="field-label">Alamat <span style="color: var(--danger);">*</span></label>
-                            <textarea name="alamat" id="alamat" required rows="2"
-                                      placeholder="cth: Jl. Merdeka No. 10, Jakarta"
-                                      class="field resize-none"><?= htmlspecialchars($old['alamat']); ?></textarea>
-                        </div>
-
-                        <div class="full">
-                            <label for="password" class="field-label">Password <span style="color: var(--danger);">*</span></label>
+                            <label for="namalengkap" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                                Nama Lengkap <span class="text-brand-400">*</span>
+                            </label>
                             <div class="relative">
-                                <input type="password" name="password" id="password" required
-                                       autocomplete="new-password"
-                                       placeholder="Minimal 6 karakter"
-                                       oninput="updateStrength(this.value)"
-                                       class="field pr-11">
-                                <button type="button" onclick="togglePassword()" tabindex="-1"
-                                        class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-md flex items-center justify-center transition hover:bg-[#F4F5F7]"
-                                        style="color: var(--muted);">
-                                    <i id="passwordIcon" class="fas fa-eye text-[12px]"></i>
+                                <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input 
+                                    type="text" 
+                                    name="namalengkap" 
+                                    id="namalengkap" 
+                                    required 
+                                    placeholder="Nama lengkap Anda"
+                                    value="<?= htmlspecialchars($old['namalengkap']); ?>"
+                                    class="input-clean">
+                            </div>
+                        </div>
+
+                        <!-- Grid: Username & Email -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label for="username" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                                    Username <span class="text-brand-400">*</span>
+                                </label>
+                                <div class="relative">
+                                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                    <input 
+                                        type="text" 
+                                        name="username" 
+                                        id="username" 
+                                        required 
+                                        placeholder="Username"
+                                        value="<?= htmlspecialchars($old['username']); ?>"
+                                        class="input-clean">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                                    Email <span class="text-brand-400">*</span>
+                                </label>
+                                <div class="relative">
+                                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                    <input 
+                                        type="email" 
+                                        name="email" 
+                                        id="email" 
+                                        required 
+                                        placeholder="nama@email.com"
+                                        value="<?= htmlspecialchars($old['email']); ?>"
+                                        class="input-clean">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alamat -->
+                        <div>
+                            <label for="alamat" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                                Alamat Domisili
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-location-dot absolute left-4 top-3 text-slate-400 text-xs"></i>
+                                <textarea 
+                                    name="alamat" 
+                                    id="alamat" 
+                                    rows="2"
+                                    placeholder="Alamat lengkap domisili Anda"
+                                    class="input-clean resize-none"><?= htmlspecialchars($old['alamat']); ?></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label for="password" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                                Password <span class="text-brand-400">*</span>
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    id="password" 
+                                    required 
+                                    placeholder="Minimal 6 karakter"
+                                    class="input-clean pr-10">
+                                <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1">
+                                    <i id="eyeIcon" class="fas fa-eye text-xs"></i>
                                 </button>
                             </div>
-
-                            <div class="mt-2 flex items-center gap-2">
-                                <div class="flex-1 h-[3px] rounded-full overflow-hidden" style="background: var(--line-soft);">
-                                    <div id="strengthBar" class="strength-bar w-0"></div>
-                                </div>
-                                <span id="strengthLabel" class="text-[10px] font-semibold uppercase tracking-wider min-w-[60px] text-right" style="color: var(--muted);">
-                                    —
-                                </span>
-                            </div>
                         </div>
 
-                        <label class="full flex items-start gap-2 cursor-pointer select-none pt-1">
-                            <input type="checkbox" required class="w-3.5 h-3.5 rounded mt-0.5" style="accent-color: var(--brand);">
-                            <span class="text-[11.5px] leading-snug" style="color: var(--muted);">
-                                Saya menyetujui <a href="#" class="font-semibold hover:underline" style="color: var(--brand);">syarat &amp; ketentuan</a> perpustakaan.
-                            </span>
-                        </label>
-
-                        <button type="submit" name="register" class="btn-primary-lg full mt-1">
-                            Buat Akun
-                        </button>
+                        <div class="pt-2">
+                            <button 
+                                type="submit" 
+                                name="register" 
+                                class="w-full bg-brand-600 hover:bg-brand-500 active:scale-[0.99] text-white font-bold py-3.5 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2 group">
+                                <span>Daftar Sekarang</span>
+                                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </button>
+                        </div>
                     </form>
+                </div>
 
-                    <p class="text-center text-[12.5px] mt-7" style="color: var(--muted);">
-                        Sudah punya akun?
-                        <a href="login.php"
-                           class="font-bold hover:underline ml-1 transition-link"
-                           data-direction="back"
-                           style="color: var(--brand);">
-                            Masuk di sini
-                        </a>
+                <div class="mt-6 pt-5 border-t border-white/10 text-center text-xs text-slate-300">
+                    Sudah memiliki akun? 
+                    <a href="login.php" class="text-brand-400 font-bold hover:text-brand-300 hover:underline ml-0.5">Masuk di Sini &rarr;</a>
+                </div>
+            </div>
+
+            <!-- ================= KANAN: ANIMASI 3D INTERAKTIF ================= -->
+            <div class="md:col-span-5 relative bg-slate-900/30 border-l border-white/10 overflow-hidden flex flex-col justify-between p-8 text-white">
+                
+                <!-- Canvas 3D -->
+                <div id="canvas3d-container"></div>
+
+                <!-- Overlay Banner Content -->
+                <div class="relative z-10 pointer-events-none">
+                    <span class="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-mono uppercase tracking-widest text-brand-200 border border-white/10">
+                        Keanggotaan Digital
+                    </span>
+                </div>
+
+                <div class="relative z-10 pointer-events-none my-auto py-12">
+                    <h3 class="text-xl font-extrabold text-white leading-snug tracking-tight">
+                        Akses Ribuan Buku Hanya dalam 1 Menit.
+                    </h3>
+                    <p class="text-xs text-brand-200/80 mt-2 leading-relaxed">
+                        Nikmati kenyamanan peminjaman literatur tanpa biaya pendaftaran.
                     </p>
                 </div>
 
-                <!-- ================= KANAN: VISUAL ================= -->
-                <div class="col-visual hidden md:block relative p-6 lg:p-8">
-                    <div class="relative h-full rounded-2xl overflow-hidden">
-
-                        <div class="blob-wrap">
-                            <div class="blob blob-1"></div>
-                            <div class="blob blob-2"></div>
-                            <div class="blob blob-3"></div>
-                        </div>
-
-                        <div class="relative z-10 h-full flex flex-col justify-between p-8 text-white">
-
-                            <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border border-white/25 bg-white/10 backdrop-blur-sm">
-                                    <i class="fas fa-user-plus text-[10px]"></i>
-                                    Gratis
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border border-white/25 bg-white/10 backdrop-blur-sm">
-                                    <i class="fas fa-clock text-[10px]"></i>
-                                    Daftar &lt; 1 menit
-                                </span>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div class="flex gap-3 items-start">
-                                    <div class="w-8 h-8 rounded-lg bg-white/15 border border-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-book text-[12px]"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[13px] font-semibold">Koleksi Lengkap</div>
-                                        <div class="text-[11px] text-white/65 mt-0.5">Beragam judul dari berbagai bidang.</div>
-                                    </div>
-                                </div>
-                                <div class="flex gap-3 items-start">
-                                    <div class="w-8 h-8 rounded-lg bg-white/15 border border-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-bolt text-[12px]"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[13px] font-semibold">Pinjam Instan</div>
-                                        <div class="text-[11px] text-white/65 mt-0.5">Kuota 3 buku, durasi 14 hari.</div>
-                                    </div>
-                                </div>
-                                <div class="flex gap-3 items-start">
-                                    <div class="w-8 h-8 rounded-lg bg-white/15 border border-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-star text-[12px]"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[13px] font-semibold">Ulas &amp; Bagikan</div>
-                                        <div class="text-[11px] text-white/65 mt-0.5">Rating dari pembaca lain.</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white/12 backdrop-blur-md border border-white/20 rounded-2xl p-5"
-                                 style="border-bottom-left-radius: 32px;">
-                                <p class="text-[14px] font-medium leading-snug text-white/95">
-                                    “Setiap buku adalah pintu ke dunia yang belum pernah kita datangi.”
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="relative z-10 pointer-events-none text-[11px] text-brand-300/60 font-mono flex items-center justify-between">
+                    <span>&copy; <?= date('Y'); ?> Digital Library</span>
+                    <span class="flex items-center gap-1.5"><i class="fas fa-cube"></i> Three.js Render</span>
                 </div>
             </div>
+
         </div>
     </div>
 
+    <!-- Scripts -->
     <script>
     function togglePassword() {
         const input = document.getElementById('password');
-        const icon  = document.getElementById('passwordIcon');
+        const icon = document.getElementById('eyeIcon');
         if (input.type === 'password') {
             input.type = 'text';
             icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -461,51 +372,113 @@ if (isset($_POST['register'])) {
         }
     }
 
-    function updateStrength(val) {
-        const bar = document.getElementById('strengthBar');
-        const label = document.getElementById('strengthLabel');
+    /* ================= THREE.JS 3D INTERACTIVE BOOK ================= */
+    (function init3D() {
+        const container = document.getElementById('canvas3d-container');
+        if (!container) return;
 
-        let score = 0;
-        if (val.length >= 6) score++;
-        if (val.length >= 10) score++;
-        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
-        if (/\d/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.z = 6;
 
-        const map = [
-            { w: '0%',   c: '#DFE1E6', t: '—',           col: '#5E6C84' },
-            { w: '20%',  c: '#FF5630', t: 'Lemah',       col: '#BF2600' },
-            { w: '40%',  c: '#FFAB00', t: 'Sedang',      col: '#7A4E00' },
-            { w: '60%',  c: '#FFAB00', t: 'Sedang',      col: '#7A4E00' },
-            { w: '80%',  c: '#36B37E', t: 'Kuat',        col: '#006644' },
-            { w: '100%', c: '#0052CC', t: 'Sangat kuat', col: '#0052CC' },
-        ];
-        const s = map[Math.min(score, 5)];
-        bar.style.width = s.w;
-        bar.style.background = s.c;
-        label.textContent = s.t;
-        label.style.color = s.col;
-    }
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const err = document.getElementById('errorBox');
-        if (err) setTimeout(() => err.classList.remove('shake'), 500);
-    });
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
 
-    /* Exit animation */
-    document.querySelectorAll('.transition-link, .back-link').forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const url = this.getAttribute('href');
-            const dir = this.dataset.direction || 'forward';
-            document.body.classList.add(dir === 'back' ? 'page-exit' : 'page-exit');
-            setTimeout(() => { window.location.href = url; }, 360);
+        const dirLight = new THREE.DirectionalLight(0x60a5fa, 1.5);
+        dirLight.position.set(5, 5, 5);
+        scene.add(dirLight);
+
+        const pointLight = new THREE.PointLight(0x2563eb, 2, 10);
+        pointLight.position.set(-3, -2, 2);
+        scene.add(pointLight);
+
+        // 3D Book Group
+        const bookGroup = new THREE.Group();
+
+        // Cover
+        const coverGeo = new THREE.BoxGeometry(2.2, 3, 0.35);
+        const coverMat = new THREE.MeshPhongMaterial({ color: 0x1d4ed8, shininess: 80 });
+        const cover = new THREE.Mesh(coverGeo, coverMat);
+        bookGroup.add(cover);
+
+        // Pages
+        const pagesGeo = new THREE.BoxGeometry(2.05, 2.85, 0.28);
+        const pagesMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+        const pages = new THREE.Mesh(pagesGeo, pagesMat);
+        pages.position.x = 0.05;
+        bookGroup.add(pages);
+
+        // Spine Accent
+        const spineGeo = new THREE.BoxGeometry(0.1, 3.02, 0.37);
+        const spineMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa });
+        const spine = new THREE.Mesh(spineGeo, spineMat);
+        spine.position.x = -1.06;
+        bookGroup.add(spine);
+
+        scene.add(bookGroup);
+
+        // Floating Particles
+        const particlesGeo = new THREE.BufferGeometry();
+        const particleCount = 60;
+        const posArray = new Float32Array(particleCount * 3);
+
+        for(let i=0; i < particleCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 8;
+        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.04,
+            color: 0x93c5fd,
+            transparent: true,
+            opacity: 0.6
         });
-    });
+        const particlesMesh = new THREE.Points(particlesGeo, particleMat);
+        scene.add(particlesMesh);
 
-    window.addEventListener('pageshow', e => {
-        if (e.persisted) document.body.classList.remove('page-exit');
-    });
+        // Interaction Mouse Tracking
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            mouseX = ((e.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouseY = -(((e.clientY - rect.top) / container.clientHeight) * 2 - 1);
+
+            targetRotationY = mouseX * 0.8;
+            targetRotationX = mouseY * 0.6;
+        });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth Interpolation (Lerp)
+            bookGroup.rotation.y += (targetRotationY - bookGroup.rotation.y) * 0.05;
+            bookGroup.rotation.x += (targetRotationX - bookGroup.rotation.x) * 0.05;
+
+            // Subtle Idle Float
+            bookGroup.position.y = Math.sin(Date.now() * 0.002) * 0.15;
+            particlesMesh.rotation.y += 0.001;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    })();
     </script>
 </body>
 </html>
