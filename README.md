@@ -1,324 +1,272 @@
-# 📚 Digital Library - Panduan Setup & Penggunaan
+<div align="center">
 
-## 🚀 Fitur Utama Sistem
+# 📚 Digital Library
 
-### **Untuk User/Mahasiswa:**
-- ✅ Login & Register akun
-- ✅ Melihat katalog buku yang tersedia
-- ✅ Pencarian & filter buku berdasarkan kategori
-- ✅ Peminjaman buku (maksimal 3 buku per saat)
-- ✅ Melihat koleksi pribadi (buku yang sedang dipinjam)
-- ✅ Melihat riwayat peminjaman & pengembalian
+**Sistem Peminjaman Buku Perpustakaan Berbasis Web**
 
-### **Untuk Admin:**
-- ✅ Kelola katalog buku (tambah, hapus)
-- ✅ Upload cover buku
-- ✅ Monitor peminjaman aktif
-- ✅ Konfirmasi pengembalian buku
-- ✅ Kelola akun user
+Cari buku. Pinjam. Kembalikan. Beri ulasan. Semua dari satu tempat.
+
+</div>
 
 ---
 
-## 📋 Langkah Setup Sistem
+## 📌 Tentang Web Ini
 
-### **1. Persiapan Database**
+**Digital Library** adalah sistem perpustakaan digital yang menghubungkan **pengguna** dengan **koleksi buku fisik perpustakaan**. Pengguna tidak perlu lagi datang ke loket untuk meminjam — cukup buka web, cari buku, dan ajukan peminjaman secara online.
 
-#### Buka phpMyAdmin:
-```
-http://localhost/phpmyadmin
-```
+Sistem ini terdiri dari **dua peran**:
 
-#### Buat database baru:
-- **Database name:** `digitallibrary`
-- **Collation:** `utf8mb4_general_ci`
-
-#### Import SQL Schema:
-1. Pilih database `digitallibrary`
-2. Tab **"Import"**
-3. Upload file: `DATABASE_SCHEMA.sql` (dari folder project)
-4. Klik **"Import"**
-
-#### Jika import gagal, jalankan manual:
-```sql
--- Copy & paste semua query dari DATABASE_SCHEMA.sql ke tab SQL
--- kemudian jalankan
-```
-
-#### Verifikasi Tabel:
-```sql
-SHOW TABLES;
--- Harusnya ada: user, buku, peminjaman, ulasan
-```
-
-#### Pastikan kolom 'Role' ada di tabel user:
-```sql
-ALTER TABLE user ADD COLUMN Role VARCHAR(20) DEFAULT 'user' AFTER Username;
-```
-
-#### Set admin role (ubah sesuai UserID):
-```sql
-UPDATE user SET Role = 'admin' WHERE UserID = 1;
-UPDATE user SET Role = 'user' WHERE Role IS NULL OR Role = '';
-```
+| | Peran | Tugas Utama |
+|---|---|---|
+| 👤 | **User** | Mencari buku, meminjam, mengembalikan, memberi ulasan |
+| 🔑 | **Admin** | Mengelola katalog buku, mengonfirmasi pengembalian, mengelola user |
 
 ---
 
-### **2. Struktur Folder Project**
+## 👤 Cara Kerja User
+
+User adalah anggota perpustakaan. Berikut aktivitas yang bisa dilakukan:
+
+### 🔍 1. Mencari Buku
+
+User bisa menelusuri katalog berdasarkan:
+- **Judul** — `Clean Code`, `Atomic Habits`, `Filosofi Teras`
+- **Penulis** — `Robert C. Martin`, `James Clear`
+- **Penerbit** atau **ISBN**
+- **Kategori** — Teknologi, Sastra, Filsafat, Bisnis, dll.
+
+Tersedia juga filter **stok tersedia / habis** dan urutan **A–Z** atau **stok terbanyak**.
+
+### 🛒 2. Meminjam Buku
+
+User dapat meminjam hingga **3 buku** sekaligus:
 
 ```
-Web Peminjaman/
-├── index.php                      (Dashboard user)
-├── login.php                      (Login)
-├── register.php                   (Register)
-├── logout.php                     (Logout)
-├── cari_buku.php                  (Katalog & peminjaman)
-├── koleksi.php                    (Koleksi pribadi)
-├── pengembalian.php               (Riwayat peminjaman)
-├── admin_peminjaman.php           (Admin panel)
-├── proses_pinjam.php              (Proses peminjaman)
-├── proses_kembali.php             (Proses pengembalian)
-├── koneksi.php                    (Konfigurasi database)
-├── DATABASE_SCHEMA.sql            (SQL schema)
-├── README.md                      (File ini)
-├── uploads/                       (Folder untuk cover buku)
-├── image/                         (Folder gambar aset)
-├── logo/                          (Folder logo)
-└── ...
+Pilih buku → Tambah ke keranjang → Konfirmasi pinjam
 ```
 
----
+Setelah dikonfirmasi:
+- Buku masuk ke **Koleksi Pribadi**
+- Durasi pinjam **14 hari** sejak tanggal peminjaman
+- Stok buku otomatis berkurang 1
 
-### **3. Setup File Konfigurasi**
+### 📚 3. Melihat Koleksi Pribadi
 
-#### Buka `koneksi.php`:
-Pastikan konfigurasi database sudah benar:
-
-```php
-<?php
-$host = "localhost";
-$user = "root";           // Username MySQL
-$pass = "";              // Password MySQL (default kosong)
-$db   = "digitallibrary";
-
-$koneksi = mysqli_connect($host, $user, $pass, $db);
-
-if (!$koneksi) {
-    die("Koneksi database gagal: " . mysqli_connect_error());
-}
-?>
-```
-
----
-
-### **4. Setup Folder Uploads**
-
-Pastikan folder `uploads/` sudah ada dengan permission **755**:
-
-```bash
-# Di command line / terminal
-mkdir uploads
-chmod 755 uploads
-```
-
-Folder ini untuk menyimpan cover buku yang diupload admin.
-
----
-
-## 📖 Panduan Penggunaan
-
-### **A. Sebagai USER/MAHASISWA:**
-
-#### 1️⃣ **Daftar Akun Baru**
-- Buka: `http://localhost/Web%20Peminjaman/register.php`
-- Isi form dengan data lengkap
-- Klik **"Register"**
-- Akan otomatis redirect ke login
-
-#### 2️⃣ **Login**
-- Buka: `http://localhost/Web%20Peminjaman/login.php`
-- Masukkan **Username** & **Password**
-- Klik **"Sign In"**
-- Akan masuk ke **Dashboard Utama**
-
-#### 3️⃣ **Mencari & Meminjam Buku**
-- Menu: **"Cari & Pinjam Buku"**
-- Gunakan fitur pencarian untuk mencari judul/penulis
-- Filter berdasarkan kategori
-- Klik **"Pinjam Sekarang"** untuk buku yang tersedia
-- Buku akan masuk ke **Keranjang Peminjaman**
-- Klik **"Lanjut Konfirmasi Pinjam"** untuk selesai
-- Durasi peminjaman: **14 hari**
-
-#### 4️⃣ **Lihat Koleksi Pribadi**
-- Menu: **"Koleksi Pribadi"**
+Di halaman **Koleksi Pribadi**, user bisa:
 - Lihat semua buku yang sedang dipinjam
-- Lihat sisa waktu pengembalian
+- Lihat **sisa hari** sebelum jatuh tempo
+- Lihat badge merah jika sudah mendekati / melewati tenggat
 
-#### 5️⃣ **Riwayat Peminjaman & Pengembalian**
-- Menu: **"Pengembalian & Ulasan"**
-- Lihat riwayat peminjaman (sedang dipinjam & sudah dikembalikan)
-- Monitor tanggal kembali
-- Fitur ulasan (akan dikembangkan)
+### 🔄 4. Mengembalikan Buku
+
+Setelah selesai membaca:
+
+```
+Klik "Ajukan Pengembalian" → Status berubah → Tunggu konfirmasi admin
+```
+
+Status akan berubah menjadi **"Menunggu Konfirmasi"**. Setelah admin menyetujui, buku dianggap sudah dikembalikan dan stok otomatis bertambah.
+
+### ⭐ 5. Memberi Ulasan
+
+Setelah buku dikonfirmasi kembali oleh admin, user bisa:
+- Memberi **rating 1–5 bintang**
+- Menulis **komentar** pengalaman membaca
+
+Ulasan ini membantu pembaca lain memilih buku.
 
 ---
 
-### **B. Sebagai ADMIN:**
+## 🔑 Cara Kerja Admin
 
-#### 1️⃣ **Login Admin**
-- Gunakan akun yang sudah set Role = 'admin'
-- Login di: `http://localhost/Web%20Peminjaman/login.php`
-- Akan masuk ke **Admin Control Panel**
+Admin adalah pengelola perpustakaan. Admin memiliki 3 area kerja:
 
-#### 2️⃣ **Tambah Buku Baru**
-- Menu: **"Kelola Buku"**
-- Isi form:
-  - **Judul Buku** (required)
-  - **Penulis** (required)
-  - **Penerbit**
-  - **Kategori** (required)
-  - **ISBN**
-  - **Tahun Terbit**
-  - **Stok** (default: 1)
-  - **Cover** (upload gambar JPG/PNG)
-- Klik **"Tambah Buku"**
-- Buku akan otomatis tampil di halaman user
+### 📕 1. Kelola Katalog Buku
 
-#### 3️⃣ **Lihat Daftar Buku**
-- Menu: **"Kelola Buku"** → **Bagian Kanan**
-- Lihat semua buku yang sudah ditambahkan
-- Lihat stok terkini
-- Tombol **"Hapus"** untuk menghapus buku
+Admin dapat mengelola seluruh koleksi buku:
 
-#### 4️⃣ **Monitor Peminjaman**
-- Menu: **"Kelola Peminjaman"**
-- Lihat semua user yang sedang meminjam
-- Lihat detail peminjaman (nama, buku, tanggal)
-- Klik **"Konfirmasi Kembali"** ketika user mengembalikan buku
-- Stok buku akan otomatis bertambah
+| Aksi | Yang Dilakukan |
+|---|---|
+| ➕ **Tambah Buku** | Isi judul, penulis, penerbit, kategori, stok, ISBN, tahun, dan upload cover |
+| ✏️ **Edit Buku** | Perbarui informasi buku, ganti cover jika perlu |
+| 🗑️ **Hapus Buku** | Hapus buku dari katalog beserta file covernya |
 
-#### 5️⃣ **Kelola Data User**
-- Menu: **"Kontrol Data User"**
-- Lihat semua akun user terdaftar
-- Lihat role setiap user
-- Tombol **"Hapus User"** untuk menghapus akun
+### 🔄 2. Konfirmasi Pengembalian
+
+Admin melihat daftar peminjaman aktif, diprioritaskan yang statusnya **"Menunggu Konfirmasi"**. Saat user mengembalikan buku fisik, admin klik **"Terima Pengembalian"**.
+
+Sistem otomatis:
+- ✅ Mencatat tanggal pengembalian aktual
+- ✅ Mengubah status menjadi **"Dikembalikan"**
+- ✅ Menambah stok buku kembali (+1)
+
+### 👥 3. Kontrol User
+
+Admin dapat:
+- Lihat **semua akun** yang terdaftar
+- Lihat role masing-masing (`admin` / `user`)
+- **Hapus user** jika diperlukan
+
+> Admin **tidak bisa menghapus akunnya sendiri** — sistem otomatis menolak.
 
 ---
 
-## 🔄 Alur Sistem Peminjaman
+## 🔄 Bagaimana Sistem Bekerja
+
+### Alur Peminjaman
 
 ```
-USER LOGIN
-    ↓
-DASHBOARD (Lihat statistik buku)
-    ↓
-CARI & PINJAM BUKU (Filter & pencarian)
-    ↓
-TAMBAH KE KERANJANG (Max 3 buku)
-    ↓
-KONFIRMASI PEMINJAMAN
-    ↓
-DATA DISIMPAN KE DATABASE
-    ↓
-STOK BUKU BERKURANG
-    ↓
-USER LIHAT KOLEKSI PRIBADI
-    ↓
-[14 HARI PEMINJAMAN]
-    ↓
-LIHAT RIWAYAT & PENGEMBALIAN
-    ↓
-ADMIN KONFIRMASI PENGEMBALIAN
-    ↓
-STOK BUKU BERTAMBAH
-    ↓
-PEMINJAMAN SELESAI
+User cari buku
+      │
+      ▼
+Tambah ke keranjang
+      │
+      ▼
+Sistem cek:
+  ├─ Kuota user < 3?      ─── Tidak → Tolak
+  └─ Stok buku > 0?       ─── Tidak → Tolak
+      │
+      ▼
+Sistem catat:
+  ├─ Tanggal pinjam       = hari ini
+  ├─ Tanggal kembali      = hari ini + 14
+  └─ Status               = "Dipinjam"
+      │
+      ▼
+Stok buku -1
+      │
+      ▼
+Buku muncul di Koleksi Pribadi user
 ```
+
+### Alur Pengembalian
+
+```
+User klik "Ajukan Pengembalian"
+      │
+      ▼
+Status = "Menunggu Konfirmasi"
+      │
+      ▼
+Admin terima pengembalian
+      │
+      ▼
+Sistem catat:
+  ├─ Tanggal pengembalian = hari ini
+  └─ Status               = "Dikembalikan"
+      │
+      ▼
+Stok buku +1
+      │
+      ▼
+User bisa memberi ulasan
+```
+
+### Aturan Sistem
+
+| Aturan | Nilai |
+|---|---|
+| Maksimal buku per user | **3 buku** |
+| Durasi peminjaman | **14 hari** |
+| Batas peminjaman per hari | **10 kali** |
+| Rating ulasan | **1–5 bintang** |
+| Ulasan per peminjaman | **1 kali** (setelah dikembalikan) |
 
 ---
 
-## 🔐 Sistem Role & Keamanan
+## 🗂 Fungsi Setiap File
 
-### **Role System:**
-- **User (default):** Hanya bisa pinjam buku, lihat katalog
-- **Admin:** Kelola buku, monitor peminjaman, kelola user
+Setiap file PHP memiliki tugas spesifik:
 
-### **Keamanan:**
-- Password di-hash dengan `password_hash()`
-- SQL prepared statements (ada improvements yang perlu dilakukan)
-- Session-based authentication
-- CSRF protection pada form (akan ditambahkan)
+### Halaman untuk User
 
----
+| File | Fungsi |
+|---|---|
+| `landing.php` | Halaman awal sebelum login — menampilkan katalog preview & info |
+| `login.php` | Halaman masuk ke akun |
+| `register.php` | Halaman pendaftaran akun baru |
+| `index.php` | Dashboard user — ringkasan aktivitas & koleksi terbaru |
+| `cari_buku.php` | Katalog buku — pencarian, filter, keranjang peminjaman |
+| `koleksi.php` | Daftar buku yang sedang dipinjam user |
+| `pengembalian.php` | Riwayat peminjaman + tab ulasan |
 
-## 📊 Tabel Database
+### Halaman untuk Admin
 
-### **Tabel: user**
-```
-UserID (PK) | Username | Password (hash) | Email | NamaLengkap | Role
-1           | admin    | bcrypt_hash     | admin@... | Admin | admin
-2           | john     | bcrypt_hash     | john@...  | John Doe | user
-```
+| File | Fungsi |
+|---|---|
+| `admin_peminjaman.php` | Panel admin — kelola buku, peminjaman, dan user |
 
-### **Tabel: buku**
-```
-BukuID (PK) | Judul | Penulis | Penerbit | Kategori | Stok | ISBN | TahunTerbit | Cover
-1           | Clean Code | Robert Martin | ... | Teknologi | 3 | ... | 2008 | cover_1.jpg
-```
+### Proses Backend (tidak punya tampilan)
 
-### **Tabel: peminjaman**
-```
-PeminjamanID (PK) | UserID (FK) | BukuID (FK) | TanggalPeminjaman | TanggalKembaliEstimasi | TanggalPengembalian | Status
-1                 | 2           | 1           | 2024-01-01        | 2024-01-15             | NULL                | Dipinjam
-```
+| File | Fungsi |
+|---|---|
+| `proses_pinjam.php` | Memproses peminjaman dari keranjang ke database |
+| `proses_kembali.php` | Memproses konfirmasi pengembalian oleh admin |
+| `proses_ulasan.php` | Menyimpan ulasan & rating user |
+| `ajukan_pengembalian.php` | Mengubah status peminjaman menjadi "Menunggu Konfirmasi" |
+| `logout.php` | Menghapus session & kembali ke login |
 
----
+### File Sistem
 
-## 🐛 Troubleshooting
-
-### **Error: "Koneksi database gagal"**
-- Pastikan MySQL/MariaDB service berjalan
-- Cek username & password di `koneksi.php`
-- Pastikan database `digitallibrary` sudah dibuat
-
-### **Error: "Table doesn't exist"**
-- Import `DATABASE_SCHEMA.sql` ke database
-- Atau jalankan query manual di phpMyAdmin
-
-### **File upload cover tidak berfungsi**
-- Pastikan folder `uploads/` sudah ada
-- Set permission folder ke `755` atau `777`
-- Cek size gambar (max 5MB)
-
-### **Login tidak berhasil**
-- Pastikan user sudah register terlebih dahulu
-- Pastikan password benar
-- Cek browser console untuk error messages
-
-### **User masuk ke halaman admin**
-- Pastikan Role di database sudah di-set dengan benar
-- Update query: `UPDATE user SET Role = 'admin' WHERE UserID = 1;`
+| File | Fungsi |
+|---|---|
+| `koneksi.php` | Koneksi ke database MySQL |
+| `DATABASE_SCHEMA.sql` | Struktur tabel database |
 
 ---
 
-## 📝 Fitur yang Bisa Dikembangkan
+## 🗄 Struktur Data
 
-- [ ] Fitur perpanjangan peminjaman
-- [ ] Sistem rating & review buku
-- [ ] Notifikasi email untuk pengembalian
-- [ ] Reservasi buku yang sedang dipinjam
-- [ ] Export laporan peminjaman ke PDF
-- [ ] Membership levels & point system
-- [ ] Kolaborasi dengan e-book provider
-- [ ] Mobile app version
+Sistem ini menyimpan data dalam **4 tabel**:
+
+```
+┌──────────────┐        ┌──────────────┐        ┌──────────────┐
+│    user      │        │    buku      │        │  peminjaman  │
+├──────────────┤        ├──────────────┤        ├──────────────┤
+│ UserID       │◄───┐   │ BukuID       │◄───┐   │ PeminjamanID │
+│ Username     │    │   │ Judul        │    │   │ UserID       │
+│ Password     │    │   │ Penulis      │    │   │ BukuID       │
+│ NamaLengkap  │    │   │ Penerbit     │    │   │ TglPinjam    │
+│ Role         │    │   │ Kategori     │    │   │ TglKembali   │
+└──────────────┘    │   │ Stok         │    │   │ TglDikembali │
+                    │   │ Cover        │    │   │ Status       │
+                    │   └──────────────┘    │   └──────────────┘
+                    │                       │          ▲
+                    │                       │          │
+                    │   ┌──────────────┐    │          │
+                    │   │   ulasan     │    │          │
+                    │   ├──────────────┤    │          │
+                    └───│ UserID       │    │          │
+                        │ BukuID       │────┘          │
+                        │ PeminjamanID │───────────────┘
+                        │ Rating       │
+                        │ Komentar     │
+                        └──────────────┘
+```
+
+- **user** — menyimpan akun pengguna & admin
+- **buku** — menyimpan katalog buku perpustakaan
+- **peminjaman** — mencatat setiap transaksi peminjaman
+- **ulasan** — menyimpan rating & komentar user
 
 ---
 
-## 👨‍💻 Support & Contact
+## 🎯 Ringkasan Singkat
 
-Untuk pertanyaan atau bug reports:
-- Email: support@digitallibrary.local
-- Dokumentasi: Lihat file ini
+| | User | Admin |
+|---|---|---|
+| **Login** | ✅ | ✅ |
+| **Cari buku** | ✅ | ✅ (kelola) |
+| **Pinjam buku** | ✅ | ❌ |
+| **Kembalikan buku** | Ajukan | Konfirmasi |
+| **Beri ulasan** | ✅ | ❌ |
+| **Tambah/edit/hapus buku** | ❌ | ✅ |
+| **Kelola user** | ❌ | ✅ |
 
 ---
 
-**Terima kasih telah menggunakan Digital Library! 📚**
+<div align="center">
+
+**Digital Library** — dibuat untuk mempermudah akses literasi 📚
+
+</div>
