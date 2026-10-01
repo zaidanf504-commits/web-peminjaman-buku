@@ -267,6 +267,6 @@ Sistem ini menyimpan data dalam **4 tabel**:
 
 <div align="center">
 
-**Digital Library** — dibuat untuk mempermudah akses literasi 📚
+**Digital Library by ZaidanDev** — dibuat untuk mempermudah akses literasi 📚
 
 </div>
