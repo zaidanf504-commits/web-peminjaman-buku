@@ -2,7 +2,7 @@
 session_start();
 require 'koneksi.php';
 
-// Kalau sudah login, redirect ke dashboard
+// Jika sudah login, alihkan ke dashboard masing-masing
 if (isset($_SESSION['UserID'])) {
     if (($_SESSION['Role'] ?? '') === 'admin') {
         header("Location: admin_peminjaman.php");
@@ -23,7 +23,7 @@ if (isset($_POST['login'])) {
     $old_username = $username;
 
     if ($username === '' || $password === '') {
-        $message = "Username dan password wajib diisi.";
+        $message = "Username dan kata sandi wajib diisi.";
     } else {
         $query = mysqli_query($koneksi, "SELECT * FROM user WHERE Username='$username' LIMIT 1");
         $data = $query ? mysqli_fetch_assoc($query) : null;
@@ -42,47 +42,45 @@ if (isset($_POST['login'])) {
             }
             exit;
         } else {
-            $message = "Username atau password salah.";
+            $message = "Kredensial tidak cocok. Silakan periksa kembali username atau kata sandi Anda.";
         }
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk — Digital Library</title>
+    <title>Otentikasi Anggota &bull; BIBLIOTHECA</title>
     
-    <!-- Tailwind CSS 3 CDN -->
+    <!-- Tailwind CSS 3 -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts: Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Three.js CDN untuk Animasi 3D Interaktif -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Typography: Newsreader + Plus Jakarta Sans + Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Newsreader"', 'Georgia', 'serif'],
+                        mono: ['"Space Mono"', 'monospace'],
                     },
                     colors: {
-                        brand: {
+                        cobalt: {
                             50: '#eff6ff',
                             100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
                             500: '#3b82f6',
                             600: '#2563eb',
                             700: '#1d4ed8',
-                            800: '#1e40af',
                             900: '#1e3a8a',
-                            950: '#0f172a',
+                            950: '#0b132b',
                         }
                     }
                 }
@@ -92,330 +90,354 @@ if (isset($_POST['login'])) {
 
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #030303;
-            color: #f8fafc;
+            background-color: #ffffff;
+            color: #0f172a;
         }
 
-        /* Glassmorphism Ultra Transparent Style */
-        .glass-card {
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        .border-hairline {
+            border-color: rgba(15, 23, 42, 0.08);
         }
 
-        .input-clean {
+        /* Input Presisi & Tenang */
+        .editorial-input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 12px 16px 12px 42px;
-            font-size: 14px;
-            color: #ffffff;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 13px 16px;
+            font-size: 13.5px;
+            color: #0f172a;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .input-clean::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+        .editorial-input::placeholder {
+            color: #94a3b8;
         }
-        .input-clean:focus {
+        .editorial-input:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.12);
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+            background-color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
-        /* Micro Entrance Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(16px); }
+        /* Latar Kanan Blueprint Tech */
+        .cobalt-blueprint {
+            background-color: #0f172a;
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        }
+
+        /* Micro Entrance Fade */
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in {
-            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .animate-enter {
+            animation: pageFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes shake {
+        @keyframes subtleShake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
         }
-        .animate-shake {
-            animation: shake 0.4s ease-in-out;
-        }
-
-        #canvas3d-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: auto;
+        .shake-error {
+            animation: subtleShake 0.4s ease-in-out;
         }
     </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
 
-    <!-- Video Background & Dark Overlay -->
-    <video 
-      autoplay 
-      loop 
-      muted 
-      playsinline 
-      class="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none"
-      src="https://www.pexels.com/download/video/6981523/">
-    </video>
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-[1px] z-0 pointer-events-none"></div>
-
-    <!-- Main Card Container -->
-    <div class="w-full max-w-4xl relative z-10 animate-fade-in my-6">
-        <div class="glass-card rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-12 min-h-[580px]">
-
-            <!-- ================= KIRI: FORM LOGIN ================= -->
-            <div class="md:col-span-7 p-8 sm:p-12 flex flex-col justify-between bg-white/5 backdrop-blur-md">
-                <div>
-                    <!-- Navigation / Header -->
-                    <div class="flex items-center justify-between mb-8">
-                        <a href="landing.php" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-300 hover:text-white transition-colors group">
-                            <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-                            <span>Beranda</span>
-                        </a>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-brand-500/20 text-brand-300 border border-brand-400/30">
-                            <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
-                            Portal Masuk
-                        </span>
-                    </div>
-
-                    <!-- Title -->
-                    <div class="mb-8">
-                        <div class="inline-flex items-center gap-2 text-brand-400 font-bold text-sm mb-2">
-                            <i class="fas fa-book-open"></i>
-                            <span>Digital Library</span>
-                        </div>
-                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Selamat Datang Kembali</h1>
-                        <p class="text-xs sm:text-sm text-slate-300 mt-1">Masukkan akun Anda untuk mengeksplorasi koleksi literatur.</p>
-                    </div>
-
-                    <!-- Success Alert -->
-                    <?php if (!empty($success_msg)): ?>
-                        <div class="flex items-center gap-3 p-3.5 mb-6 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-xs backdrop-blur-md">
-                            <i class="fas fa-check-circle text-emerald-400 text-base flex-shrink-0"></i>
-                            <div><?= htmlspecialchars($success_msg); ?></div>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Error Alert -->
-                    <?php if (!empty($message)): ?>
-                        <div class="animate-shake flex items-center gap-3 p-3.5 mb-6 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-200 text-xs backdrop-blur-md">
-                            <i class="fas fa-exclamation-circle text-rose-400 text-base flex-shrink-0"></i>
-                            <div><?= htmlspecialchars($message); ?></div>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Form -->
-                    <form method="POST" action="" class="space-y-4">
-                        <div>
-                            <label for="username" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Username</label>
-                            <div class="relative">
-                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                <input 
-                                    type="text" 
-                                    name="username" 
-                                    id="username" 
-                                    required 
-                                    placeholder="Masukkan username Anda"
-                                    value="<?= htmlspecialchars($old_username); ?>"
-                                    class="input-clean">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="password" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Password</label>
-                            <div class="relative">
-                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                <input 
-                                    type="password" 
-                                    name="password" 
-                                    id="password" 
-                                    required 
-                                    placeholder="••••••••"
-                                    class="input-clean pr-10">
-                                <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1">
-                                    <i id="eyeIcon" class="fas fa-eye text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="pt-1">
-                            <button 
-                                type="submit" 
-                                name="login" 
-                                class="w-full bg-brand-600 hover:bg-brand-500 active:scale-[0.99] text-white font-bold py-3.5 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2 group">
-                                <span>Masuk Sekarang</span>
-                                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-300">
-                    Belum memiliki akun? 
-                    <a href="register.php" class="text-brand-400 font-bold hover:text-brand-300 hover:underline ml-0.5">Daftar Akun Baru &rarr;</a>
-                </div>
-            </div>
-
-            <!-- ================= KANAN: ANIMASI 3D INTERAKTIF ================= -->
-            <div class="md:col-span-5 relative bg-slate-900/30 border-l border-white/10 overflow-hidden flex flex-col justify-between p-8 text-white">
-                
-                <!-- Canvas 3D -->
-                <div id="canvas3d-container"></div>
-
-                <!-- Overlay Banner Content -->
-                <div class="relative z-10 pointer-events-none">
-                    <span class="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-mono uppercase tracking-widest text-brand-200 border border-white/10">
-                        3D Interactive Library
-                    </span>
-                </div>
-
-                <div class="relative z-10 pointer-events-none my-auto py-12">
-                    <h3 class="text-xl font-extrabold text-white leading-snug tracking-tight">
-                        Eksplorasi Pengetahuan Tanpa Batas.
-                    </h3>
-                    <p class="text-xs text-brand-200/80 mt-2 leading-relaxed">
-                        Gerakkan kursor Anda di area ini untuk berinteraksi dengan visual 3D buku digital kami.
-                    </p>
-                </div>
-
-                <div class="relative z-10 pointer-events-none text-[11px] text-brand-300/60 font-mono flex items-center justify-between">
-                    <span>&copy; <?= date('Y'); ?> Digital Library</span>
-                    <span class="flex items-center gap-1.5"><i class="fas fa-cube"></i> Three.js Render</span>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script>
-    function togglePassword() {
-        const input = document.getElementById('password');
-        const icon = document.getElementById('eyeIcon');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
-        }
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.164.1/build/three.module.js"
+      }
     }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row selection:bg-cobalt-600 selection:text-white">
 
-    /* ================= THREE.JS 3D INTERACTIVE BOOK ================= */
-    (function init3D() {
-        const container = document.getElementById('canvas3d-container');
-        if (!container) return;
+    <!-- ================= KOLOM KIRI: FORMULIR OTENTIKASI ================= -->
+    <main class="w-full lg:w-[50%] xl:w-[46%] min-h-screen flex flex-col justify-between p-8 sm:p-12 md:p-16 border-r border-hairline bg-white z-10 animate-enter">
+        
+        <!-- Header Navigasi -->
+        <div class="flex items-center justify-between border-b border-hairline pb-5">
+            <a href="landing.php" class="inline-flex items-center gap-2.5 text-xs font-mono uppercase tracking-widest text-slate-500 hover:text-cobalt-600 transition-colors group">
+                <i class="fa-solid fa-arrow-left text-[10px] group-hover:-translate-x-1 transition-transform"></i>
+                <span>Kembali ke Beranda</span>
+            </a>
+            <span class="text-[10px] font-mono text-cobalt-600 font-bold tracking-widest uppercase bg-cobalt-50 px-2.5 py-1 rounded">
+                SECURE AUTH // ID-01
+            </span>
+        </div>
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.z = 6;
+        <!-- Konten Form Utama -->
+        <div class="max-w-md w-full mx-auto my-10">
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-2 h-2 rounded-full bg-cobalt-600"></span>
+                    <span class="text-[11px] font-mono uppercase tracking-widest text-slate-500 font-semibold">Bibliotheca Digital</span>
+                </div>
+                <h1 class="font-serif text-4xl sm:text-5xl text-slate-900 font-normal tracking-tight leading-[1.1]">
+                    Masuk ke ruang <br><em class="italic text-cobalt-600 font-normal">baca digital.</em>
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-2.5 leading-relaxed">
+                    Masukkan akun peminjam Anda untuk mengelola buku aktif dan mengakses katalog reservasi.
+                </p>
+            </div>
 
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
+            <!-- Notifikasi Sukses Registrasi -->
+            <?php if (!empty($success_msg)): ?>
+                <div class="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded flex items-start gap-3">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                    <div class="leading-relaxed font-medium"><?= htmlspecialchars($success_msg); ?></div>
+                </div>
+            <?php endif; ?>
 
-        // Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambientLight);
+            <!-- Notifikasi Error Login -->
+            <?php if (!empty($message)): ?>
+                <div class="shake-error mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded flex items-start gap-3">
+                    <i class="fa-solid fa-circle-exclamation text-rose-600 mt-0.5 text-sm"></i>
+                    <div class="leading-relaxed font-medium"><?= htmlspecialchars($message); ?></div>
+                </div>
+            <?php endif; ?>
 
-        const dirLight = new THREE.DirectionalLight(0x60a5fa, 1.5);
-        dirLight.position.set(5, 5, 5);
-        scene.add(dirLight);
+            <form method="POST" action="" class="space-y-4" id="loginForm">
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="username" class="text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700">
+                            Username Anggota <span class="text-cobalt-600">*</span>
+                        </label>
+                    </div>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        id="username" 
+                        required 
+                        autocomplete="username"
+                        placeholder="Ketik username Anda"
+                        value="<?= htmlspecialchars($old_username); ?>"
+                        class="editorial-input interactive-field">
+                </div>
 
-        const pointLight = new THREE.PointLight(0x2563eb, 2, 10);
-        pointLight.position.set(-3, -2, 2);
-        scene.add(pointLight);
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="password" class="text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700">
+                            Kata Sandi <span class="text-cobalt-600">*</span>
+                        </label>
+                        <button type="button" onclick="togglePass()" class="text-[10px] font-mono text-cobalt-600 hover:text-cobalt-700 font-bold focus:outline-none">
+                            <span id="toggleText">LIHAT</span>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            name="password" 
+                            id="password" 
+                            required 
+                            autocomplete="current-password"
+                            placeholder="••••••••"
+                            class="editorial-input interactive-field pr-10">
+                    </div>
+                </div>
 
-        // 3D Book Group
-        const bookGroup = new THREE.Group();
+                <div class="pt-2">
+                    <button 
+                        type="submit" 
+                        name="login" 
+                        class="w-full bg-slate-900 hover:bg-cobalt-600 active:scale-[0.99] text-white font-semibold py-3.5 px-6 rounded text-xs uppercase font-mono tracking-widest transition-all duration-200 flex items-center justify-between shadow-sm group">
+                        <span>Verifikasi & Masuk</span>
+                        <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </form>
 
-        // Cover
-        const coverGeo = new THREE.BoxGeometry(2.2, 3, 0.35);
-        const coverMat = new THREE.MeshPhongMaterial({ color: 0x1d4ed8, shininess: 80 });
-        const cover = new THREE.Mesh(coverGeo, coverMat);
-        bookGroup.add(cover);
+            <!-- Tautan Registrasi -->
+            <div class="mt-8 pt-5 border-t border-hairline flex items-center justify-between text-xs text-slate-600">
+                <span>Belum memiliki kartu anggota?</span>
+                <a href="register.php" class="font-mono font-bold text-cobalt-600 hover:text-cobalt-700 uppercase tracking-wider hover:underline">
+                    Daftar Baru &rarr;
+                </a>
+            </div>
+        </div>
 
-        // Pages
-        const pagesGeo = new THREE.BoxGeometry(2.05, 2.85, 0.28);
-        const pagesMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
-        const pages = new THREE.Mesh(pagesGeo, pagesMat);
-        pages.position.x = 0.05;
-        bookGroup.add(pages);
+        <!-- Footer Meta -->
+        <div class="pt-5 border-t border-hairline flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>KEAMANAN ENKRIPSI BCRYPT</span>
+            <span>&copy; <?= date('Y'); ?> BIBLIOTHECA</span>
+        </div>
 
-        // Spine Accent
-        const spineGeo = new THREE.BoxGeometry(0.1, 3.02, 0.37);
-        const spineMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa });
-        const spine = new THREE.Mesh(spineGeo, spineMat);
-        spine.position.x = -1.06;
-        bookGroup.add(spine);
+    </main>
 
-        scene.add(bookGroup);
+    <!-- ================= KOLOM KANAN: STUDIO 3D ARSIP ================= -->
+    <aside class="hidden lg:flex lg:flex-1 relative cobalt-blueprint text-white flex-col justify-between p-12 overflow-hidden select-none">
+        
+        <!-- Header Kanan -->
+        <div class="relative z-10 flex items-center justify-between border-b border-white/10 pb-5 text-xs font-mono text-blue-200/80">
+            <span class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                VISUALISASI 3D ARSIP
+            </span>
+            <span class="text-[10px] text-slate-400">PERSPEKTIF INTERAKTIF</span>
+        </div>
 
-        // Floating Particles
-        const particlesGeo = new THREE.BufferGeometry();
-        const particleCount = 60;
-        const posArray = new Float32Array(particleCount * 3);
+        <!-- 3D Stage Container -->
+        <div id="login-3d-stage" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
 
-        for(let i=0; i < particleCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 8;
+        <!-- Kotak Catatan Editorial -->
+        <div class="relative z-10 max-w-sm bg-slate-950/70 backdrop-blur-md border border-white/10 p-5 rounded pointer-events-none">
+            <div class="text-[9px] font-mono uppercase tracking-widest text-blue-400 mb-1.5">
+                Koleksi Fisik & Digital
+            </div>
+            <p class="font-serif italic text-base leading-snug text-slate-200 mb-3">
+                "Sebuah buku adalah perangkat paling ringkas untuk melintasi ruang dan masa."
+            </p>
+            <div class="text-[10px] font-mono text-slate-400 flex items-center justify-between pt-2.5 border-t border-white/10">
+                <span>RESPON KURSOR AKTIF</span>
+                <span>WEBGL / THREE.JS</span>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ================= SCRIPT & THREE.JS LOGIC ================= -->
+    <script>
+        function togglePass() {
+            const p = document.getElementById('password');
+            const t = document.getElementById('toggleText');
+            if (p.type === 'password') {
+                p.type = 'text';
+                t.textContent = 'SEMBUNYIKAN';
+            } else {
+                p.type = 'password';
+                t.textContent = 'LIHAT';
+            }
         }
-        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particleMat = new THREE.PointsMaterial({
-            size: 0.04,
-            color: 0x93c5fd,
-            transparent: true,
-            opacity: 0.6
-        });
-        const particlesMesh = new THREE.Points(particlesGeo, particleMat);
-        scene.add(particlesMesh);
+    </script>
 
-        // Interaction Mouse Tracking
-        let mouseX = 0;
-        let mouseY = 0;
-        let targetRotationX = 0;
-        let targetRotationY = 0;
+    <script type="module">
+        import * as THREE from 'three';
 
-        container.addEventListener('mousemove', (e) => {
-            const rect = container.getBoundingClientRect();
-            mouseX = ((e.clientX - rect.left) / container.clientWidth) * 2 - 1;
-            mouseY = -(((e.clientY - rect.top) / container.clientHeight) * 2 - 1);
+        const container = document.getElementById('login-3d-stage');
+        if (container) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 1.2, 8.5);
 
-            targetRotationY = mouseX * 0.8;
-            targetRotationX = mouseY * 0.6;
-        });
-
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Smooth Interpolation (Lerp)
-            bookGroup.rotation.y += (targetRotationY - bookGroup.rotation.y) * 0.05;
-            bookGroup.rotation.x += (targetRotationX - bookGroup.rotation.x) * 0.05;
-
-            // Subtle Idle Float
-            bookGroup.position.y = Math.sin(Date.now() * 0.002) * 0.15;
-            particlesMesh.rotation.y += 0.001;
-
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Responsive Resize
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
-        });
-    })();
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            const bookGroup = new THREE.Group();
+            scene.add(bookGroup);
+
+            // Fungsi Membuat Buku Hardcover dengan Proporsi Nyata
+            function createBook(coverColor, y, ry, rz) {
+                const book = new THREE.Group();
+
+                // Blok Halaman Kertas
+                const pages = new THREE.Mesh(
+                    new THREE.BoxGeometry(2.5, 3.4, 0.44),
+                    new THREE.MeshStandardMaterial({ color: 0xfbfbf9, roughness: 0.9 })
+                );
+                pages.castShadow = true;
+                pages.receiveShadow = true;
+                book.add(pages);
+
+                // Kulit Sampul Buku
+                const coverMat = new THREE.MeshStandardMaterial({ 
+                    color: coverColor, 
+                    roughness: 0.28, 
+                    metalness: 0.08 
+                });
+
+                const front = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.52, 0.04), coverMat);
+                front.position.z = 0.23;
+                front.castShadow = true;
+                book.add(front);
+
+                const back = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.52, 0.04), coverMat);
+                back.position.z = -0.23;
+                back.castShadow = true;
+                book.add(back);
+
+                const spine = new THREE.Mesh(new THREE.BoxGeometry(0.06, 3.52, 0.5), coverMat);
+                spine.position.x = -1.28;
+                spine.castShadow = true;
+                book.add(spine);
+
+                book.position.y = y;
+                book.rotation.y = ry;
+                book.rotation.z = rz;
+                return book;
+            }
+
+            // Dua Buku Berdampingan dengan Rotasi Elegan
+            const bookA = createBook(0xffffff, 0.2, -0.4, 0.06);
+            const bookB = createBook(0x2563eb, -0.5, 0.35, -0.12);
+            bookB.position.x = 1.0;
+            bookB.position.z = -1.0;
+
+            bookGroup.add(bookA);
+            bookGroup.add(bookB);
+
+            // Pencahayaan
+            const ambient = new THREE.AmbientLight(0xffffff, 1.4);
+            scene.add(ambient);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+            keyLight.position.set(5, 8, 7);
+            keyLight.castShadow = true;
+            scene.add(keyLight);
+
+            const fillLight = new THREE.DirectionalLight(0x60a5fa, 1.2);
+            fillLight.position.set(-6, -3, 3);
+            scene.add(fillLight);
+
+            // Parallax Halus Berbasis Mouse
+            let targetRotY = -0.2;
+            let targetRotX = 0.1;
+            let focusImpulse = 0;
+
+            container.addEventListener('pointermove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const nx = (e.clientX - rect.left) / rect.width - 0.5;
+                const ny = (e.clientY - rect.top) / rect.height - 0.5;
+                targetRotY = -0.2 + nx * 0.8;
+                targetRotX = 0.1 + ny * 0.5;
+            });
+
+            // Respon halus saat pengguna memfokuskan kursor pada input
+            document.querySelectorAll('.interactive-field').forEach(el => {
+                el.addEventListener('focus', () => { focusImpulse = 0.12; });
+                el.addEventListener('blur', () => { focusImpulse = 0; });
+            });
+
+            const clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+
+                bookGroup.rotation.y += (targetRotY - bookGroup.rotation.y) * 0.05;
+                bookGroup.rotation.x += (targetRotX - bookGroup.rotation.x) * 0.05;
+
+                // Animasi Melayang Tenang (Harmonic Idle Float)
+                bookA.position.y = 0.2 + Math.sin(t * 1.4) * 0.06 + focusImpulse;
+                bookB.position.y = -0.5 + Math.cos(t * 1.1) * 0.06 - (focusImpulse * 0.5);
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
     </script>
 </body>
 </html>
