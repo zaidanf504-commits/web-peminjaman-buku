@@ -131,6 +131,15 @@ function bookCoverInner(array $buku): string
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <!-- Three.js for 3D -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+    }
+  }
+  </script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -182,6 +191,18 @@ function bookCoverInner(array $buku): string
     .animate-dropdown { animation: dropdown-in 0.2s ease-out forwards; }
     .duration-400 { transition-duration: 400ms; }
 
+    /* Text Reveal Animation - Staggered word/line reveal */
+    .text-reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      display: inline-block;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .text-reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #030303; }
@@ -215,6 +236,67 @@ function bookCoverInner(array $buku): string
       from { transform: translateX(0); }
       to { transform: translateX(-100%); }
     }
+
+    /* 3D Book Card Tilt Effect */
+    .book-item {
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+    }
+    .book-item:hover {
+      transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+      box-shadow: 
+        0 20px 40px -15px rgba(0,0,0,0.5),
+        0 8px 16px -8px rgba(6,182,212,0.15),
+        inset 0 1px 1px rgba(255,255,255,0.1);
+      border-color: rgba(6,182,212,0.3);
+      z-index: 10;
+    }
+    .book-item .aspect-\[3\/4\] {
+      transform-style: preserve-3d;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .book-item:hover .aspect-\[3\/4\] {
+      transform: translateZ(12px) scale(1.02);
+    }
+    .book-item .group-hover\:scale-105 {
+      transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .book-item:hover .group-hover\:scale-105 {
+      transform: scale(1.08) translateZ(4px);
+    }
+
+    /* Stat Card Shimmer */
+    .stat-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 40%, rgba(6,182,212,0.08) 50%, transparent 60%);
+      transform: translateX(-100%);
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .stat-card:hover::before {
+      transform: translateX(100%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .book-item,
+      .book-item .aspect-\[3\/4\],
+      .book-item .group-hover\:scale-105 {
+        transition: none;
+      }
+      .book-item:hover {
+        transform: translateY(-4px);
+      }
+      .stat-card::before {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body class="bg-[#030303] text-white overflow-x-hidden selection:bg-white selection:text-black">
@@ -232,6 +314,9 @@ function bookCoverInner(array $buku): string
       src="https://www.pexels.com/download/video/5363312/">
     </video>
     <div class="absolute inset-0 bg-black/40 z-0 pointer-events-none"></div>
+
+    <!-- 3D Canvas Layer -->
+    <div id="hero-canvas" class="absolute inset-0 z-5 pointer-events-none"></div>
 
     <!-- Header Navigation (Top, Responsive Padding) -->
     <header class="relative z-20 w-full px-5 sm:px-6 md:px-12 lg:px-16 py-4 sm:py-5 flex items-center justify-between">
@@ -298,23 +383,23 @@ function bookCoverInner(array $buku): string
         
         <!-- Headline -->
         <h1 class="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] tracking-[-0.02em] font-medium">
-          Buku adalah jendela<br>
-          dunia. <span class="text-white/60">Books are a window to</span><br>
-          <span class="text-white/60">the world.</span>
+          <span class="text-reveal">Buku adalah jendela</span><br>
+          <span class="text-reveal" style="transition-delay: 0.08s;">dunia.</span> <span class="text-white/60 text-reveal" style="transition-delay: 0.16s;">Books are a window to</span><br>
+          <span class="text-white/60 text-reveal" style="transition-delay: 0.24s;">the world.</span>
         </h1>
 
         <!-- Subheading -->
-        <p class="text-white/80 text-sm sm:text-base md:text-lg leading-relaxed max-w-md mx-auto mt-6 sm:mt-8 font-normal">
-          Flowpath unifies your complete wellness tools, so your crew spends less energy plugging gaps and more on real progress.
+        <p class="text-white/80 text-sm sm:text-base md:text-lg leading-relaxed max-w-md mx-auto mt-6 sm:mt-8 font-normal text-reveal" style="transition-delay: 0.32s;">
+          Temukan ribuan judul, pinjam dengan satu sentuhan, dan bangun kebiasaan membaca yang berkelanjutan.
         </p>
 
         <!-- CTA Action Buttons -->
-        <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
+        <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 text-reveal" style="transition-delay: 0.4s;">
           <a href="register.php" class="px-5 sm:px-6 py-2.5 sm:py-3 bg-white text-gray-900 text-sm font-semibold rounded-full hover:bg-white/90 transition-all shadow-lg hover:scale-105 active:scale-95">
-            Begin your journey
+            Mulai Jelajahi
           </a>
           <a href="#katalog" class="px-5 sm:px-6 py-2.5 sm:py-3 liquid-glass rounded-full text-white text-sm font-semibold hover:bg-white/10 transition-all">
-            See it live
+            Lihat Katalog
           </a>
         </div>
 
@@ -371,7 +456,7 @@ function bookCoverInner(array $buku): string
       ];
       foreach ($statsGrid as $st):
       ?>
-      <div class="liquid-glass rounded-2xl p-6 text-center border border-white/10 hover:border-white/30 transition-all reveal-item">
+      <div class="stat-card liquid-glass rounded-2xl p-6 text-center border border-white/10 hover:border-white/30 transition-all reveal-item">
         <i class="fas <?= $st['icon']; ?> text-white/40 text-lg mb-3"></i>
         <div class="text-3xl sm:text-4xl font-semibold text-white tracking-tight mb-1">
           <span class="stat-counter" data-target="<?= (int)$st['value']; ?>">0</span><?= $st['suffix']; ?>
@@ -512,6 +597,12 @@ function bookCoverInner(array $buku): string
         });
       }
 
+      // Hero Text Reveal - Staggered animation on load
+      const heroTextElements = document.querySelectorAll('#beranda .text-reveal');
+      heroTextElements.forEach((el, i) => {
+        setTimeout(() => el.classList.add('revealed'), 100 + i * 80);
+      });
+
       // 2. Scroll Reveal Observer
       const revealItems = document.querySelectorAll('.reveal-item');
       if ('IntersectionObserver' in window) {
@@ -584,7 +675,293 @@ function bookCoverInner(array $buku): string
         catalogSearch.addEventListener('input', applyCatalogFilter);
       }
 
+      // Book Card Mouse Glow Effect
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced) {
+        bookItems.forEach(card => {
+          const cover = card.querySelector('.aspect-\\[3\\/4\\]');
+          if (!cover) return;
+
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+            const dx = (x - cx) / cx;
+            const dy = (y - cy) / cy;
+
+            // Subtle glow following mouse
+            const glowX = 50 + dx * 30;
+            const glowY = 50 + dy * 30;
+            cover.style.background = `radial-gradient(ellipse ${glowX}% ${glowY}% at ${glowX}% ${glowY}%, rgba(6,182,212,0.08) 0%, transparent 60%), var(--card-bg, transparent)`;
+          });
+
+          card.addEventListener('mouseleave', () => {
+            cover.style.background = '';
+          });
+        });
+      }
+
+      // 5. Three.js 3D Hero Background
+      initHero3D();
     });
+
+    // Three.js 3D Scene - Subtle floating geometry
+    async function initHero3D() {
+      const container = document.getElementById('hero-canvas');
+      if (!container) return;
+
+      try {
+        const { default: THREE } = await import('three');
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 35);
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        // Color palette - dark theme with cyan accents
+        const colors = [
+          new THREE.Color(0x06b6d4), // cyan-500
+          new THREE.Color(0x0891b2), // cyan-600
+          new THREE.Color(0x155e75), // cyan-800
+          new THREE.Color(0xffffff), // white
+        ];
+
+        // Geometry: Low-poly book-like shapes + floating particles
+        const geometries = [
+          new THREE.BoxGeometry(1.2, 1.8, 0.3, 2, 2, 1),  // book
+          new THREE.BoxGeometry(1, 1.5, 0.25, 2, 2, 1),   // small book
+          new THREE.BoxGeometry(1.4, 2, 0.35, 2, 2, 1),   // large book
+          new THREE.OctahedronGeometry(0.6, 0),           // crystal
+          new THREE.TetrahedronGeometry(0.5, 0),          // pyramid
+        ];
+
+        const materials = colors.map(c => new THREE.MeshPhysicalMaterial({
+          color: c,
+          metalness: 0.15,
+          roughness: 0.85,
+          transmission: 0.1,
+          thickness: 0.5,
+          transparent: true,
+          opacity: 0.7,
+          side: THREE.DoubleSide,
+        }));
+
+        // Add subtle wireframe material for variety
+        const wireMaterial = new THREE.MeshBasicMaterial({
+          color: 0x06b6d4,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.12,
+        });
+
+        const meshes = [];
+        const meshCount = 28;
+
+        for (let i = 0; i < meshCount; i++) {
+          const geo = geometries[Math.floor(Math.random() * geometries.length)];
+          const isWire = Math.random() < 0.15;
+          const mat = isWire ? wireMaterial : materials[Math.floor(Math.random() * materials.length)];
+          
+          const mesh = new THREE.Mesh(geo, mat);
+          
+          // Position in a spherical cloud
+          const radius = 12 + Math.random() * 18;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          
+          mesh.position.set(
+            radius * Math.sin(phi) * Math.cos(theta),
+            radius * Math.sin(phi) * Math.sin(theta) * 0.6,
+            radius * Math.cos(phi) - 20
+          );
+          
+          // Random rotation
+          mesh.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+          );
+          
+          // Animation properties
+          mesh.userData = {
+            basePos: mesh.position.clone(),
+            rotSpeed: new THREE.Vector3(
+              (Math.random() - 0.5) * 0.0008,
+              (Math.random() - 0.5) * 0.0012,
+              (Math.random() - 0.5) * 0.0005
+            ),
+            floatOffset: Math.random() * Math.PI * 2,
+            floatSpeed: 0.0003 + Math.random() * 0.0004,
+            floatAmplitude: 0.3 + Math.random() * 0.5,
+            delay: Math.random() * 1000,
+          };
+          
+          scene.add(mesh);
+          meshes.push(mesh);
+        }
+
+        // Floating particles (smaller, more numerous)
+        const particleCount = 180;
+        const particleGeo = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleSizes = new Float32Array(particleCount);
+        const particleAlphas = new Float32Array(particleCount);
+        const particlePhases = new Float32Array(particleCount);
+
+        for (let i = 0; i < particleCount; i++) {
+          const radius = 8 + Math.random() * 28;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          
+          particlePositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+          particlePositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.5;
+          particlePositions[i * 3 + 2] = radius * Math.cos(phi) - 20;
+          particleSizes[i] = 0.5 + Math.random() * 1.5;
+          particleAlphas[i] = 0.15 + Math.random() * 0.35;
+          particlePhases[i] = Math.random() * Math.PI * 2;
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        particleGeo.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+        particleGeo.setAttribute('alpha', new THREE.BufferAttribute(particleAlphas, 1));
+        particleGeo.setAttribute('phase', new THREE.BufferAttribute(particlePhases, 1));
+
+        const particleMat = new THREE.PointsMaterial({
+          color: 0x06b6d4,
+          size: 1,
+          transparent: true,
+          opacity: 1,
+          vertexColors: false,
+          sizeAttenuation: true,
+          depthWrite: false,
+        });
+
+        const particles = new THREE.Points(particleGeo, particleMat);
+        scene.add(particles);
+
+        // Subtle ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        // Directional light for rim highlights
+        const dirLight = new THREE.DirectionalLight(0x06b6d4, 0.3);
+        dirLight.position.set(5, 10, 8);
+        scene.add(dirLight);
+
+        const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.2);
+        dirLight2.position.set(-5, -5, -5);
+        scene.add(dirLight2);
+
+        // Mouse parallax
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+          mouseX = (e.clientX / window.innerWidth - 0.5) * 1.2;
+          mouseY = (e.clientY / window.innerHeight - 0.5) * 1.2;
+        });
+
+        // Touch support
+        document.addEventListener('touchmove', (e) => {
+          if (e.touches[0]) {
+            mouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 1.2;
+            mouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 1.2;
+          }
+        }, { passive: true });
+
+        // Reduce motion
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Animation loop
+        let time = 0;
+        function animate() {
+          requestAnimationFrame(animate);
+          time += 0.016;
+
+          if (!prefersReduced) {
+            // Smooth mouse follow
+            targetX += (mouseX - targetX) * 0.02;
+            targetY += (mouseY - targetY) * 0.02;
+
+            // Animate meshes
+            meshes.forEach((mesh, i) => {
+              const ud = mesh.userData;
+              const t = time + ud.delay * 0.001;
+
+              // Gentle floating
+              mesh.position.y = ud.basePos.y + Math.sin(t * ud.floatSpeed) * ud.floatAmplitude;
+              mesh.position.x = ud.basePos.x + Math.cos(t * ud.floatSpeed * 0.7) * ud.floatAmplitude * 0.5;
+
+              // Continuous rotation
+              mesh.rotation.x += ud.rotSpeed.x;
+              mesh.rotation.y += ud.rotSpeed.y;
+              mesh.rotation.z += ud.rotSpeed.z;
+
+              // Subtle mouse parallax
+              mesh.position.x += targetX * (i % 3 + 1) * 0.15;
+              mesh.position.y -= targetY * (i % 3 + 1) * 0.15;
+            });
+
+            // Animate particles
+            const posAttr = particles.geometry.attributes.position;
+            const phaseAttr = particles.geometry.attributes.phase;
+            
+            for (let i = 0; i < particleCount; i++) {
+              const phase = phaseAttr.getX(i);
+              const t = time + phase;
+              
+              posAttr.setY(i, posAttr.getY(i) + Math.sin(t * 0.0008) * 0.02);
+              posAttr.setX(i, posAttr.getX(i) + Math.cos(t * 0.0006) * 0.015);
+              posAttr.setZ(i, posAttr.getZ(i) + Math.sin(t * 0.0005) * 0.01);
+              
+              // Mouse influence on particles
+              posAttr.setX(i, posAttr.getX(i) + targetX * 0.3);
+              posAttr.setY(i, posAttr.getY(i) - targetY * 0.3);
+            }
+            posAttr.needsUpdate = true;
+
+            // Slow camera drift
+            camera.position.x += (targetX * 0.8 - camera.position.x) * 0.008;
+            camera.position.y += (-targetY * 0.8 - camera.position.y) * 0.008;
+            camera.lookAt(0, 0, -20);
+          }
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+
+        // Performance: pause when tab hidden
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            renderer.setAnimationLoop(null);
+          } else {
+            renderer.setAnimationLoop(animate);
+          }
+        });
+
+      } catch (e) {
+        console.warn('3D scene failed to initialize:', e);
+        // Fallback: subtle CSS animation on container
+        container.style.background = 'radial-gradient(ellipse at center, rgba(6,182,212,0.03) 0%, transparent 70%)';
+      }
+    }
   </script>
 </body>
 </html>
