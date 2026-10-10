@@ -79,6 +79,38 @@ $kuota_penuh = $sisa_kuota <= 0;
             color: var(--brand);
         }
 
+        /* Stat card — dapat diklik */
+        .stat-card {
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+            transition:
+                border-color .18s ease,
+                box-shadow .18s ease,
+                transform .18s ease;
+        }
+        .stat-card:hover {
+            border-color: var(--brand);
+            box-shadow: 0 4px 12px -4px rgba(9,30,66,.15), 0 0 0 1px rgba(9,30,66,.06);
+            transform: translateY(-2px);
+        }
+        .stat-card:hover .stat-icon {
+            color: var(--brand) !important;
+        }
+        .stat-card:hover .stat-arrow {
+            transform: translateX(2px);
+        }
+        .stat-card:focus-visible {
+            outline: 2px solid var(--brand);
+            outline-offset: 2px;
+        }
+        .stat-arrow {
+            transition: transform .18s ease;
+        }
+        .stat-icon {
+            transition: color .18s ease;
+        }
+
         /* Line clamp */
         .clamp-1 {
             display: -webkit-box; -webkit-line-clamp: 1;
@@ -246,16 +278,18 @@ $kuota_penuh = $sisa_kuota <= 0;
                         </p>
                     </div>
 
-                    <!-- ===== Statistik ===== -->
+                    <!-- ===== Statistik (dapat diklik) ===== -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-                        <!-- Dipinjam -->
-                        <div class="card p-4">
+                        <!-- Kartu 1: Sedang Dipinjam → koleksi.php -->
+                        <a href="koleksi.php"
+                           class="card stat-card p-4"
+                           title="Lihat buku yang sedang dipinjam">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-semibold uppercase tracking-[0.1em]" style="color: var(--muted);">
                                     Sedang Dipinjam
                                 </span>
-                                <i class="fas fa-book-open text-[12px]" style="color: var(--muted);"></i>
+                                <i class="fas fa-book-open text-[12px] stat-icon" style="color: var(--muted);"></i>
                             </div>
                             <div class="flex items-end gap-1.5">
                                 <div class="text-[28px] font-semibold leading-none tnum" style="color: var(--ink);">
@@ -265,20 +299,27 @@ $kuota_penuh = $sisa_kuota <= 0;
                                     / 3 kuota
                                 </div>
                             </div>
-                            <!-- Progress bar -->
                             <div class="mt-3 h-1 rounded-full overflow-hidden" style="background: var(--line-soft);">
                                 <div class="h-full transition-all"
                                      style="width: <?= min(100, ($buku_dipinjam/3)*100); ?>%; background: <?= $kuota_penuh ? '#BF2600' : 'var(--brand)'; ?>;"></div>
                             </div>
-                        </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <span class="text-[11px] font-medium" style="color: var(--muted);">
+                                    <?= $buku_dipinjam > 0 ? 'Lihat koleksi' : 'Belum ada pinjaman'; ?>
+                                </span>
+                                <i class="fas fa-arrow-right text-[10px] stat-arrow" style="color: var(--brand);"></i>
+                            </div>
+                        </a>
 
-                        <!-- Total Koleksi -->
-                        <div class="card p-4">
+                        <!-- Kartu 2: Total Koleksi → pengembalian.php -->
+                        <a href="pengembalian.php"
+                           class="card stat-card p-4"
+                           title="Lihat riwayat peminjaman">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-semibold uppercase tracking-[0.1em]" style="color: var(--muted);">
                                     Total Koleksi
                                 </span>
-                                <i class="fas fa-clock-rotate-left text-[12px]" style="color: var(--muted);"></i>
+                                <i class="fas fa-clock-rotate-left text-[12px] stat-icon" style="color: var(--muted);"></i>
                             </div>
                             <div class="text-[28px] font-semibold leading-none tnum" style="color: var(--ink);">
                                 <?= $total_koleksi; ?>
@@ -286,15 +327,23 @@ $kuota_penuh = $sisa_kuota <= 0;
                             <div class="text-[12px] mt-3" style="color: var(--muted);">
                                 Sepanjang waktu
                             </div>
-                        </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <span class="text-[11px] font-medium" style="color: var(--muted);">
+                                    Lihat riwayat
+                                </span>
+                                <i class="fas fa-arrow-right text-[10px] stat-arrow" style="color: var(--brand);"></i>
+                            </div>
+                        </a>
 
-                        <!-- Buku Tersedia -->
-                        <div class="card p-4">
+                        <!-- Kartu 3: Buku Tersedia → cari_buku.php -->
+                        <a href="cari_buku.php"
+                           class="card stat-card p-4"
+                           title="Cari dan pinjam buku">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-semibold uppercase tracking-[0.1em]" style="color: var(--muted);">
                                     Buku Tersedia
                                 </span>
-                                <i class="fas fa-layer-group text-[12px]" style="color: var(--muted);"></i>
+                                <i class="fas fa-layer-group text-[12px] stat-icon" style="color: var(--muted);"></i>
                             </div>
                             <div class="text-[28px] font-semibold leading-none tnum" style="color: var(--ink);">
                                 <?= $total_stok; ?>
@@ -302,7 +351,13 @@ $kuota_penuh = $sisa_kuota <= 0;
                             <div class="text-[12px] mt-3" style="color: var(--muted);">
                                 Eksemplar fisik
                             </div>
-                        </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <span class="text-[11px] font-medium" style="color: var(--muted);">
+                                    Cari buku
+                                </span>
+                                <i class="fas fa-arrow-right text-[10px] stat-arrow" style="color: var(--brand);"></i>
+                            </div>
+                        </a>
                     </div>
 
                     <!-- ===== Aktivitas terakhir ===== -->
@@ -395,7 +450,6 @@ $kuota_penuh = $sisa_kuota <= 0;
                                                 <i class="fas fa-book text-2xl"></i>
                                             </div>
                                         <?php else: ?>
-                                            <!-- Placeholder tipografi — bukan gradient -->
                                             <div class="w-full h-full flex flex-col justify-between p-3" style="background: var(--brand-light);">
                                                 <div class="text-[9px] font-semibold uppercase tracking-[0.14em] clamp-2" style="color: var(--brand);">
                                                     <?= htmlspecialchars($buku['Kategori'] ?: 'Umum'); ?>
