@@ -72,7 +72,7 @@ if (isset($_POST['register'])) {
     <!-- Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -85,13 +85,13 @@ if (isset($_POST['register'])) {
                     },
                     colors: {
                         cobalt: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a',
-                            950: '#0b132b',
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#0f172a',
+                            950: '#070d1e',
                         }
                     }
                 }
@@ -109,51 +109,41 @@ if (isset($_POST['register'])) {
             border-color: rgba(15, 23, 42, 0.08);
         }
 
-        .editorial-input {
+        .input-editorial {
             width: 100%;
             background-color: #f8fafc;
             border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            border-radius: 8px;
             padding: 11px 14px;
-            font-size: 13px;
+            font-size: 13.5px;
             color: #0f172a;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .editorial-input::placeholder {
+        .input-editorial::placeholder {
             color: #94a3b8;
         }
-        .editorial-input:focus {
+        .input-editorial:focus {
             outline: none;
             background-color: #ffffff;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            border-color: #1d4ed8;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
         }
 
-        .cobalt-blueprint {
-            background-color: #0f172a;
-            background-size: 32px 32px;
+        .blueprint-canvas-bg {
+            background-color: #070d1e;
             background-image: 
-                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+                radial-gradient(circle at 50% 50%, rgba(29, 78, 216, 0.15) 0%, transparent 70%),
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 36px 36px, 36px 36px;
         }
 
-        @keyframes pageFadeIn {
-            from { opacity: 0; transform: translateY(12px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-enter {
-            animation: pageFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* 3D Card Live Hover Effect */
-        .member-card-3d {
-            transform-style: preserve-3d;
-            perspective: 1000px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .member-card-3d:hover {
-            transform: translateY(-4px) rotateX(2deg) rotateY(-2deg);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        .page-enter {
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 
@@ -167,46 +157,40 @@ if (isset($_POST['register'])) {
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-cobalt-600 selection:text-white">
 
-    <!-- ================= KOLOM KIRI: FORMULIR REGISTRASI ================= -->
-    <main class="w-full lg:w-[52%] xl:w-[48%] min-h-screen flex flex-col justify-between p-8 sm:p-12 md:px-16 md:py-12 border-r border-hairline bg-white z-10 animate-enter">
+    <!-- KOLOM KIRI: FORMULIR REGISTRASI -->
+    <main class="w-full lg:w-[50%] xl:w-[46%] min-h-screen flex flex-col justify-between p-8 sm:p-12 md:px-14 md:py-10 border-r border-hairline bg-white z-10 page-enter">
         
-        <!-- Header Navigasi -->
         <div class="flex items-center justify-between border-b border-hairline pb-4">
-            <a href="landing.php" class="inline-flex items-center gap-2.5 text-xs font-mono uppercase tracking-widest text-slate-500 hover:text-cobalt-600 transition-colors group">
-                <i class="fa-solid fa-arrow-left text-[10px] group-hover:-translate-x-1 transition-transform"></i>
+            <a href="landing.php" class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-cobalt-600 transition-colors group">
+                <i class="fa-solid fa-arrow-left text-[11px] group-hover:-translate-x-1 transition-transform"></i>
                 <span>Kembali ke Beranda</span>
             </a>
-            <span class="text-[10px] font-mono text-cobalt-600 font-bold tracking-widest uppercase bg-cobalt-50 px-2.5 py-1 rounded">
-                PENERBITAN KARTU // REG-02
+            <span class="text-[11px] font-mono text-slate-500 tracking-wider">
+                ID // 02-REG
             </span>
         </div>
 
-        <!-- Form Konten -->
         <div class="max-w-md w-full mx-auto my-6">
             <div class="mb-6">
                 <div class="flex items-center gap-2 mb-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span class="text-[11px] font-mono uppercase tracking-widest text-slate-500 font-semibold">Pendaftaran Anggota</span>
+                     
                 </div>
                 <h1 class="font-serif text-3xl sm:text-4xl text-slate-900 font-normal tracking-tight leading-tight">
-                    Kartu akses perpustakaan <br><em class="italic text-cobalt-600 font-normal">dalam satu langkah.</em>
+                    Kartu akses pustaka <br><em class="italic text-cobalt-600 font-normal">dalam satu langkah.</em>
                 </h1>
                 <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                    Lengkapi identitas Anda di bawah ini. Pratinjau kartu anggota fisik di sisi kanan akan diperbarui secara langsung.
+                    Lengkapi formulir berikut. Kartu sirkulasi 3D di sisi kanan akan diperbarui secara langsung saat Anda mengetik.
                 </p>
             </div>
 
-            <!-- Pesan Kesalahan -->
             <?php if (!empty($message)): ?>
-                <div class="mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded flex items-start gap-3">
+                <div class="mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-start gap-3">
                     <i class="fa-solid fa-circle-exclamation text-rose-600 mt-0.5 text-sm"></i>
                     <div class="leading-relaxed font-medium"><?= htmlspecialchars($message); ?></div>
                 </div>
             <?php endif; ?>
 
             <form method="POST" action="" class="space-y-3.5">
-                
-                <!-- Nama Lengkap -->
                 <div>
                     <label for="namalengkap" class="block text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700 mb-1">
                         Nama Lengkap <span class="text-cobalt-600">*</span>
@@ -217,13 +201,12 @@ if (isset($_POST['register'])) {
                         id="namalengkap" 
                         required 
                         autocomplete="name"
-                        placeholder="Contoh: Muhamad Zaidan Faiz"
+                        placeholder="Contoh: Muhammad Farhan"
                         value="<?= htmlspecialchars($old['namalengkap']); ?>"
-                        class="editorial-input">
+                        class="input-editorial">
                 </div>
 
-                <!-- Grid Username & Email -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label for="username" class="block text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700 mb-1">
                             Username <span class="text-cobalt-600">*</span>
@@ -234,9 +217,9 @@ if (isset($_POST['register'])) {
                             id="username" 
                             required 
                             autocomplete="username"
-                            placeholder="zaidan_faiz"
+                            placeholder="farhan_library"
                             value="<?= htmlspecialchars($old['username']); ?>"
-                            class="editorial-input">
+                            class="input-editorial">
                     </div>
 
                     <div>
@@ -251,11 +234,10 @@ if (isset($_POST['register'])) {
                             autocomplete="email"
                             placeholder="nama@domain.com"
                             value="<?= htmlspecialchars($old['email']); ?>"
-                            class="editorial-input">
+                            class="input-editorial">
                     </div>
                 </div>
 
-                <!-- Alamat Domisili -->
                 <div>
                     <label for="alamat" class="block text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700 mb-1">
                         Alamat Domisili
@@ -264,17 +246,16 @@ if (isset($_POST['register'])) {
                         name="alamat" 
                         id="alamat" 
                         rows="2"
-                        placeholder="Kota atau alamat domisili saat ini"
-                        class="editorial-input resize-none leading-relaxed"><?= htmlspecialchars($old['alamat']); ?></textarea>
+                        placeholder="Alamat atau kota domisili saat ini"
+                        class="input-editorial resize-none leading-relaxed"><?= htmlspecialchars($old['alamat']); ?></textarea>
                 </div>
 
-                <!-- Password -->
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label for="password" class="text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700">
                             Kata Sandi <span class="text-cobalt-600">*</span>
                         </label>
-                        <button type="button" onclick="toggleRegPassword()" class="text-[10px] font-mono text-cobalt-600 hover:text-cobalt-700 font-bold focus:outline-none">
+                        <button type="button" onclick="toggleRegPassword()" class="text-[11px] font-mono text-cobalt-600 hover:text-cobalt-700 font-bold focus:outline-none">
                             <span id="eyeLabel">LIHAT</span>
                         </button>
                     </div>
@@ -285,21 +266,20 @@ if (isset($_POST['register'])) {
                         required 
                         autocomplete="new-password"
                         placeholder="Minimal 6 karakter"
-                        class="editorial-input">
+                        class="input-editorial">
                 </div>
 
                 <div class="pt-2">
                     <button 
                         type="submit" 
                         name="register" 
-                        class="w-full bg-slate-900 hover:bg-cobalt-600 active:scale-[0.99] text-white font-semibold py-3.5 px-6 rounded text-xs uppercase font-mono tracking-widest transition-all duration-200 flex items-center justify-between shadow-sm group">
-                        <span>Terbitkan Akun & Selesai</span>
+                        class="w-full bg-slate-900 hover:bg-cobalt-600 active:scale-[0.99] text-white font-medium py-3.5 px-6 rounded-lg text-xs uppercase font-mono tracking-wider transition-all duration-200 flex items-center justify-between shadow-sm group">
+                        <span>Terbitkan Akun Anggota</span>
                         <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </div>
             </form>
 
-            <!-- Tautan Kembali ke Login -->
             <div class="mt-6 pt-4 border-t border-hairline flex items-center justify-between text-xs text-slate-600">
                 <span>Sudah memiliki akun terdaftar?</span>
                 <a href="login.php" class="font-mono font-bold text-cobalt-600 hover:text-cobalt-700 uppercase tracking-wider hover:underline">
@@ -308,82 +288,24 @@ if (isset($_POST['register'])) {
             </div>
         </div>
 
-        <!-- Footer Meta -->
         <div class="pt-4 border-t border-hairline flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>KEANGGOTAAN BEBAS BIAYA</span>
+            <span>KEANGGOTAAN DIGITAL RESMI</span>
             <span>&copy; <?= date('Y'); ?> BIBLIOTHECA</span>
         </div>
-
     </main>
 
-    <!-- ================= KOLOM KANAN: LIVE PREVIEW KARTU 3D ================= -->
-    <aside class="hidden lg:flex lg:flex-1 relative cobalt-blueprint text-white flex-col justify-between p-12 overflow-hidden select-none">
-        
-        <!-- Header Kanan -->
-        <div class="relative z-10 flex items-center justify-between border-b border-white/10 pb-5 text-xs font-mono text-blue-200/80">
-            <span class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                SIMULASI KARTU ANGGOTA FISIK
-            </span>
-            <span class="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded">REALTIME SYNC</span>
-        </div>
+    <!-- KOLOM KANAN: SIMULASI KARTU ANGGOTA 3D THREE.JS -->
+    <aside class="hidden lg:flex lg:flex-1 relative blueprint-canvas-bg text-white flex-col justify-between p-12 overflow-hidden select-none">
+    
+        <!-- Kanvas 3D -->
+        <div id="register-3d-stage" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
 
-        <!-- 3D Background Canvas -->
-        <div id="register-3d-stage" class="absolute inset-0 z-0"></div>
-
-        <!-- Kartu Anggota Realtime Preview -->
-        <div class="relative z-10 my-auto mx-auto w-full max-w-sm pointer-events-auto">
-            <div id="liveMemberCard" class="member-card-3d bg-white text-slate-900 p-6 rounded-lg shadow-2xl border-t-8 border-cobalt-600">
-                
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                    <div>
-                        <div class="font-serif font-bold text-lg tracking-tight text-slate-900">BIBLIOTHECA</div>
-                        <div class="text-[8.5px] font-mono uppercase tracking-widest text-cobalt-600 font-bold">Kartu Sirkulasi Pustaka</div>
-                    </div>
-                    <!-- Chip Kartu Akses Bergaya EMV -->
-                    <div class="w-8 h-6 rounded bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700 text-[10px]">
-                        <i class="fa-solid fa-microchip"></i>
-                    </div>
-                </div>
-
-                <div class="space-y-3 font-mono text-xs">
-                    <div>
-                        <div class="text-[9px] text-slate-400 uppercase tracking-widest">Nama Pemegang Kartu</div>
-                        <div id="previewName" class="text-sm font-sans font-bold text-slate-900 truncate mt-0.5">
-                            <?= !empty($old['namalengkap']) ? htmlspecialchars($old['namalengkap']) : 'MUHAMAD ZAIDAN FAIZ'; ?>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-                        <div>
-                            <div class="text-[9px] text-slate-400 uppercase tracking-widest">ID Pengguna</div>
-                            <div id="previewUser" class="text-xs font-bold text-cobalt-600 truncate mt-0.5">
-                                @<?= !empty($old['username']) ? htmlspecialchars($old['username']) : 'zaidan_faiz'; ?>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="text-[9px] text-slate-400 uppercase tracking-widest">Status Akses</div>
-                            <div class="text-xs font-bold text-emerald-600 mt-0.5">AKTIF // REGULER</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-mono text-slate-400">
-                    <span>SEUMUR HIDUP</span>
-                    <span class="tracking-widest">||| |||| || |||||</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer Kanan -->
         <div class="relative z-10 flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-white/10 pt-4">
-            <span>OTOMATISASI PENERBITAN KARTU</span>
-            <span>STANDAR SIRKULASI 2026</span>
+            <span>GERAKKAN KURSOR UNTUK MEMUTAR KARTU</span>
+            <span>OTOMATISASI PENERBITAN</span>
         </div>
-
     </aside>
 
-    <!-- ================= SCRIPT & THREE.JS LOGIC ================= -->
     <script>
         function toggleRegPassword() {
             const input = document.getElementById('password');
@@ -396,103 +318,195 @@ if (isset($_POST['register'])) {
                 label.textContent = 'LIHAT';
             }
         }
-
-        // Sinkronisasi Ketikan Nama & Username ke Kartu Fisik
-        const nameInput = document.getElementById('namalengkap');
-        const userInput = document.getElementById('username');
-        const previewName = document.getElementById('previewName');
-        const previewUser = document.getElementById('previewUser');
-        const liveCard = document.getElementById('liveMemberCard');
-
-        if (nameInput && previewName) {
-            nameInput.addEventListener('input', (e) => {
-                const val = e.target.value.trim();
-                previewName.textContent = val ? val.toUpperCase() : 'NAMA LENGKAP ANDA';
-                if (liveCard) {
-                    liveCard.style.transform = 'translateY(-2px) scale(1.01)';
-                    setTimeout(() => liveCard.style.transform = '', 160);
-                }
-            });
-        }
-
-        if (userInput && previewUser) {
-            userInput.addEventListener('input', (e) => {
-                const val = e.target.value.trim();
-                previewUser.textContent = val ? '@' + val : '@username';
-            });
-        }
     </script>
 
+    <!-- Script Three.js 3D Dynamic Card Stage -->
     <script type="module">
         import * as THREE from 'three';
 
         const container = document.getElementById('register-3d-stage');
         if (container) {
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 0, 9);
+            const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 7.5);
 
             const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
-            const group = new THREE.Group();
-            scene.add(group);
+            const cardGroup = new THREE.Group();
+            scene.add(cardGroup);
 
-            // Cincin Geometri Orbit Tenang
-            const ringGeo = new THREE.TorusGeometry(3.0, 0.015, 16, 100);
-            const ringMat = new THREE.MeshBasicMaterial({ color: 0x93c5fd, transparent: true, opacity: 0.25 });
-            const ring1 = new THREE.Mesh(ringGeo, ringMat);
-            group.add(ring1);
+            // Membuat Canvas 2D Beresolusi Tinggi untuk Permukaan Depan Kartu
+            const cardCanvas = document.createElement('canvas');
+            cardCanvas.width = 1024;
+            cardCanvas.height = 640;
+            const ctx = cardCanvas.getContext('2d');
+            const cardTexture = new THREE.CanvasTexture(cardCanvas);
 
-            const ring2 = new THREE.Mesh(ringGeo, ringMat);
-            ring2.rotation.x = Math.PI / 2.8;
-            group.add(ring2);
+            // Fungsi Menggambar Permukaan Kartu Fisik
+            function drawCardSurface(name, user) {
+                const displayName = (name && name.trim()) ? name.toUpperCase() : 'M. ZAIDAN FAIZ';
+                const displayUser = (user && user.trim()) ? '@' + user.toLowerCase() : '@zaidan';
 
-            // Elemen Buku Penunjang di Belakang Kartu
-            function makeSmallBook(x, y, z, color) {
-                const bGroup = new THREE.Group();
-                const cover = new THREE.Mesh(
-                    new THREE.BoxGeometry(1.6, 2.2, 0.28),
-                    new THREE.MeshStandardMaterial({ color: color, roughness: 0.35 })
-                );
-                bGroup.add(cover);
-                bGroup.position.set(x, y, z);
-                return bGroup;
+                // Latar Belakang Kartu (Matte Obsidian & Deep Navy)
+                const grad = ctx.createLinearGradient(0, 0, 1024, 640);
+                grad.addColorStop(0, '#0c1527');
+                grad.addColorStop(1, '#050914');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 1024, 640);
+
+                // Pola Garis Teknis
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.lineWidth = 1;
+                for (let y = 40; y < 640; y += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(1024, y);
+                    ctx.stroke();
+                }
+
+                // Garis Aksen Cobalt Biru di Atas
+                ctx.fillStyle = '#1d4ed8';
+                ctx.fillRect(0, 0, 1024, 18);
+
+                // Header Kartu
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 36px "Newsreader", serif';
+                ctx.fillText('BIBLIOTHECA', 60, 90);
+
+                ctx.fillStyle = '#60a5fa';
+                ctx.font = 'bold 15px "Space Mono", monospace';
+                ctx.fillText('KARTU SIRKULASI PUSTAKA // DIGITAL PASS', 60, 120);
+
+                // Chip Logam EMV Emas
+                ctx.fillStyle = '#eab308';
+                ctx.beginPath();
+                ctx.roundRect(60, 160, 110, 85, 10);
+                ctx.fill();
+                ctx.strokeStyle = '#ca8a04';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Garis Sirkuit Chip
+                ctx.strokeStyle = '#a16207';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(85, 175, 60, 55);
+
+                // Data Anggota
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '14px "Space Mono", monospace';
+                ctx.fillText('NAMA PEMEGANG KARTU', 60, 310);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 34px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText(displayName, 60, 360);
+
+                // ID Pengguna & Status
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '14px "Space Mono", monospace';
+                ctx.fillText('ID PENGGUNA', 60, 440);
+                ctx.fillStyle = '#60a5fa';
+                ctx.font = 'bold 22px "Space Mono", monospace';
+                ctx.fillText(displayUser, 60, 475);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '14px "Space Mono", monospace';
+                ctx.fillText('STATUS AKSES', 420, 440);
+                ctx.fillStyle = '#34d399';
+                ctx.font = 'bold 22px "Space Mono", monospace';
+                ctx.fillText('AKTIF // VIP', 420, 475);
+
+                // Barcode di Bawah
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '24px monospace';
+                ctx.letterSpacing = '6px';
+                ctx.fillText('||||| |||| | |||||| ||| ||||||| |||||', 60, 570);
+
+                ctx.fillStyle = '#64748b';
+                ctx.font = '13px "Space Mono", monospace';
+                ctx.letterSpacing = '0px';
+                ctx.fillText('TERBIT: 2026 // RESMI', 740, 570);
+
+                cardTexture.needsUpdate = true;
             }
 
-            const bookLeft = makeSmallBook(-2.8, 1.6, -1.8, 0xffffff);
-            const bookRight = makeSmallBook(2.8, -1.6, -1.8, 0x2563eb);
-            group.add(bookLeft);
-            group.add(bookRight);
+            // Inisialisasi gambar kartu dengan nilai awal
+            const inputNama = document.getElementById('namalengkap');
+            const inputUser = document.getElementById('username');
+            drawCardSurface(inputNama.value, inputUser.value);
 
-            const ambient = new THREE.AmbientLight(0xffffff, 1.5);
+            // Membuat Bentuk Kartu 3D
+            const cardGeometry = new THREE.BoxGeometry(4.2, 2.65, 0.06);
+
+            const sideMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 });
+            const frontMat = new THREE.MeshStandardMaterial({
+                map: cardTexture,
+                roughness: 0.25,
+                metalness: 0.15
+            });
+            const backMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.5 });
+
+            const materials = [sideMat, sideMat, sideMat, sideMat, frontMat, backMat];
+            const cardMesh = new THREE.Mesh(cardGeometry, materials);
+            cardGroup.add(cardMesh);
+
+            // Cincin Geometri Orbit Tenang di Belakang Kartu
+            const ringGeo = new THREE.TorusGeometry(3.2, 0.015, 16, 120);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.25 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2.5;
+            scene.add(ring);
+
+            // Pencahayaan
+            const ambient = new THREE.AmbientLight(0xffffff, 1.6);
             scene.add(ambient);
 
-            const dirLight = new THREE.DirectionalLight(0x60a5fa, 1.8);
-            dirLight.position.set(5, 5, 6);
-            scene.add(dirLight);
+            const spotLight = new THREE.DirectionalLight(0xffffff, 2.5);
+            spotLight.position.set(4, 5, 6);
+            scene.add(spotLight);
 
-            let mouseX = 0, mouseY = 0;
-            window.addEventListener('pointermove', (e) => {
-                mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
-                mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
+            const sheenLight = new THREE.PointLight(0x60a5fa, 2.0, 15);
+            sheenLight.position.set(-3, -2, 4);
+            scene.add(sheenLight);
+
+            // Responsivitas Formulir ke Tekstur 3D secara Real-Time
+            let tiltImpulse = 0;
+            function triggerCardUpdate() {
+                drawCardSurface(inputNama.value, inputUser.value);
+                tiltImpulse = 0.15;
+            }
+
+            inputNama.addEventListener('input', triggerCardUpdate);
+            inputUser.addEventListener('input', triggerCardUpdate);
+
+            // Interaksi Kursor Mouse
+            let targetRotX = 0;
+            let targetRotY = 0;
+
+            container.addEventListener('pointermove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const nx = (e.clientX - rect.left) / rect.width - 0.5;
+                const ny = (e.clientY - rect.top) / rect.height - 0.5;
+                targetRotY = nx * 0.9;
+                targetRotX = -ny * 0.6;
             });
 
             const clock = new THREE.Clock();
             function animate() {
                 requestAnimationFrame(animate);
-                const t = clock.getElapsedTime();
+                const elapsed = clock.getElapsedTime();
 
-                group.rotation.y += (mouseX - group.rotation.y) * 0.04;
-                group.rotation.x += (mouseY - group.rotation.x) * 0.04;
+                // LERP rotasi kartu
+                cardGroup.rotation.y += (targetRotY - cardGroup.rotation.y) * 0.06;
+                cardGroup.rotation.x += (targetRotX + tiltImpulse - cardGroup.rotation.x) * 0.06;
+                tiltImpulse *= 0.92;
 
-                bookLeft.rotation.y = t * 0.25;
-                bookRight.rotation.y = -t * 0.25;
-
-                ring1.rotation.z = t * 0.08;
-                ring2.rotation.y = t * 0.12;
+                // Animasi mengambang tenang
+                cardGroup.position.y = Math.sin(elapsed * 1.5) * 0.08;
+                ring.rotation.z = elapsed * 0.08;
 
                 renderer.render(scene, camera);
             }
