@@ -14,6 +14,7 @@ if (isset($_SESSION['UserID'])) {
 
 $message = '';
 $old = ['namalengkap' => '', 'username' => '', 'email' => '', 'alamat' => ''];
+$is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 if (isset($_POST['register'])) {
     $namaLengkap = mysqli_real_escape_string($koneksi, trim($_POST['namalengkap'] ?? ''));
@@ -49,12 +50,27 @@ if (isset($_POST['register'])) {
 
             if (mysqli_query($koneksi, $query)) {
                 $_SESSION['success'] = "Pendaftaran berhasil! Akun Anda aktif, silakan masuk.";
+                if ($is_ajax) {
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode([
+                        'ok'       => true,
+                        'redirect' => 'login.php',
+                        'nama'     => $namaLengkap
+                    ]);
+                    exit;
+                }
                 header("Location: login.php");
                 exit;
             } else {
                 $message = "Terjadi gangguan sistem: " . mysqli_error($koneksi);
             }
         }
+    }
+
+    if ($is_ajax && $message !== '') {
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['ok' => false, 'message' => $message]);
+        exit;
     }
 }
 ?>
@@ -103,6 +119,7 @@ if (isset($_POST['register'])) {
         body {
             background-color: #ffffff;
             color: #0f172a;
+            overflow-x: hidden;
         }
 
         .border-hairline {
@@ -138,12 +155,83 @@ if (isset($_POST['register'])) {
             background-size: 100% 100%, 36px 36px, 36px 36px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes subtleShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
-        .page-enter {
-            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .shake-error {
+            animation: subtleShake 0.42s ease-in-out;
+        }
+
+        /* ==================== SPLIT CURTAIN TRANSITION SYSTEM ==================== */
+        #archival-curtain {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            overflow: hidden;
+        }
+        #archival-curtain.is-interactive {
+            pointer-events: all;
+        }
+        .curtain-panel {
+            width: 50%;
+            height: 100%;
+            background-color: #070d1e;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(29, 78, 216, 0.16) 0%, transparent 70%),
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 36px 36px, 36px 36px;
+            transition: transform 0.72s cubic-bezier(0.76, 0, 0.24, 1);
+            will-change: transform;
+            position: relative;
+        }
+        .curtain-left {
+            border-right: 1px solid rgba(212, 175, 55, 0.45);
+            transform: translateX(0%);
+        }
+        .curtain-right {
+            border-left: 1px solid rgba(212, 175, 55, 0.45);
+            transform: translateX(0%);
+        }
+        #archival-curtain.is-open .curtain-left {
+            transform: translateX(-100%);
+        }
+        #archival-curtain.is-open .curtain-right {
+            transform: translateX(100%);
+        }
+
+        #curtain-center-badge {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 105;
+            pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #archival-curtain.is-open ~ #curtain-center-badge {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.88);
+        }
+
+        .curtain-content-sync {
+            transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+        }
+        body.curtain-closed .curtain-content-sync {
+            transform: scale(0.97);
+            opacity: 0.35;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .curtain-panel,
+            #curtain-center-badge,
+            .curtain-content-sync {
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 
@@ -155,13 +243,35 @@ if (isset($_POST['register'])) {
     }
     </script>
 </head>
-<body class="min-h-screen flex flex-col lg:flex-row selection:bg-cobalt-600 selection:text-white">
+<body class="min-h-screen flex flex-col lg:flex-row selection:bg-cobalt-600 selection:text-white curtain-closed">
+
+    <!-- ==================== TIRAI PEMISAH DARI TENGAH (SPLIT CURTAIN OVERLAY) ==================== -->
+    <div id="archival-curtain" class="is-interactive" aria-hidden="true">
+        <div class="curtain-panel curtain-left flex items-center justify-end pr-6 sm:pr-10">
+            <span class="font-mono text-[10px] tracking-[0.25em] text-slate-400 uppercase hidden sm:inline">BIBLIOTHECA</span>
+        </div>
+        <div class="curtain-panel curtain-right flex items-center justify-start pl-6 sm:pl-10">
+            <span class="font-mono text-[10px] tracking-[0.25em] text-amber-400/90 uppercase hidden sm:inline">MEMBERSHIP LEDGER</span>
+        </div>
+    </div>
+
+    <!-- Lencana Tengah Tirai -->
+    <div id="curtain-center-badge" aria-live="polite">
+        <div class="px-6 py-4 rounded-xl bg-slate-950/95 border border-amber-400/40 shadow-2xl text-center min-w-[270px] sm:min-w-[320px] backdrop-blur-md">
+            <div id="curtain-badge-code" class="font-mono text-[10px] uppercase tracking-[0.22em] text-blue-400 mb-1">
+                ID // 02-REG &bull; REGISTRASI ANGGOTA
+            </div>
+            <div id="curtain-badge-title" class="font-serif italic text-xl text-white tracking-tight">
+                Membuka Pencetakan Kartu...
+            </div>
+        </div>
+    </div>
 
     <!-- KOLOM KIRI: FORMULIR REGISTRASI -->
-    <main class="w-full lg:w-[50%] xl:w-[46%] min-h-screen flex flex-col justify-between p-8 sm:p-12 md:px-14 md:py-10 border-r border-hairline bg-white z-10 page-enter">
+    <main class="w-full lg:w-[50%] xl:w-[46%] min-h-screen flex flex-col justify-between p-8 sm:p-12 md:px-14 md:py-10 border-r border-hairline bg-white z-10 curtain-content-sync">
         
         <div class="flex items-center justify-between border-b border-hairline pb-4">
-            <a href="landing.php" class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-cobalt-600 transition-colors group">
+            <a href="landing.php" data-curtain-link="landing" class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-cobalt-600 transition-colors group">
                 <i class="fa-solid fa-arrow-left text-[11px] group-hover:-translate-x-1 transition-transform"></i>
                 <span>Kembali ke Beranda</span>
             </a>
@@ -172,9 +282,6 @@ if (isset($_POST['register'])) {
 
         <div class="max-w-md w-full mx-auto my-6">
             <div class="mb-6">
-                <div class="flex items-center gap-2 mb-2">
-                     
-                </div>
                 <h1 class="font-serif text-3xl sm:text-4xl text-slate-900 font-normal tracking-tight leading-tight">
                     Kartu akses pustaka <br><em class="italic text-cobalt-600 font-normal">dalam satu langkah.</em>
                 </h1>
@@ -183,14 +290,13 @@ if (isset($_POST['register'])) {
                 </p>
             </div>
 
-            <?php if (!empty($message)): ?>
-                <div class="mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-start gap-3">
-                    <i class="fa-solid fa-circle-exclamation text-rose-600 mt-0.5 text-sm"></i>
-                    <div class="leading-relaxed font-medium"><?= htmlspecialchars($message); ?></div>
-                </div>
-            <?php endif; ?>
+            <div id="regErrorBox" class="<?= !empty($message) ? 'shake-error' : 'hidden'; ?> mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-start gap-3" role="alert">
+                <i class="fa-solid fa-circle-exclamation text-rose-600 mt-0.5 text-sm"></i>
+                <div id="regErrorText" class="leading-relaxed font-medium"><?= htmlspecialchars($message); ?></div>
+            </div>
 
-            <form method="POST" action="" class="space-y-3.5">
+            <form id="registerForm" method="POST" action="" class="space-y-3.5">
+                <input type="hidden" name="register" value="1">
                 <div>
                     <label for="namalengkap" class="block text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700 mb-1">
                         Nama Lengkap <span class="text-cobalt-600">*</span>
@@ -272,18 +378,19 @@ if (isset($_POST['register'])) {
                 <div class="pt-2">
                     <button 
                         type="submit" 
-                        name="register" 
+                        id="submitRegBtn"
                         class="w-full bg-slate-900 hover:bg-cobalt-600 active:scale-[0.99] text-white font-medium py-3.5 px-6 rounded-lg text-xs uppercase font-mono tracking-wider transition-all duration-200 flex items-center justify-between shadow-sm group">
-                        <span>Terbitkan Akun Anggota</span>
-                        <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+                        <span id="submitRegText">Terbitkan Akun Anggota</span>
+                        <i id="submitRegIcon" class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </div>
             </form>
 
             <div class="mt-6 pt-4 border-t border-hairline flex items-center justify-between text-xs text-slate-600">
                 <span>Sudah memiliki akun terdaftar?</span>
-                <a href="login.php" class="font-mono font-bold text-cobalt-600 hover:text-cobalt-700 uppercase tracking-wider hover:underline">
-                    Masuk ke Akun &rarr;
+                <a href="login.php" data-curtain-link="login" class="font-mono font-bold text-cobalt-600 hover:text-cobalt-700 uppercase tracking-wider hover:underline inline-flex items-center gap-1.5 group">
+                    <span>Masuk ke Akun</span>
+                    <span class="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
                 </a>
             </div>
         </div>
@@ -295,8 +402,13 @@ if (isset($_POST['register'])) {
     </main>
 
     <!-- KOLOM KANAN: SIMULASI KARTU ANGGOTA 3D THREE.JS -->
-    <aside class="hidden lg:flex lg:flex-1 relative blueprint-canvas-bg text-white flex-col justify-between p-12 overflow-hidden select-none">
-    
+    <aside class="hidden lg:flex lg:flex-1 relative blueprint-canvas-bg text-white flex-col justify-between p-12 overflow-hidden select-none curtain-content-sync">
+        
+        <div class="relative z-10 flex items-center justify-between border-b border-white/10 pb-4 text-xs font-mono text-slate-400">
+            <span>STAGE // MEMBERSHIP PASS</span>
+            <span class="text-emerald-400">LIVE PREVIEW</span>
+        </div>
+
         <!-- Kanvas 3D -->
         <div id="register-3d-stage" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
 
@@ -320,15 +432,139 @@ if (isset($_POST['register'])) {
         }
     </script>
 
-    <!-- Script Three.js 3D Dynamic Card Stage -->
+    <!-- Script Three.js 3D Dynamic Card Stage + Koreografi Tirai -->
     <script type="module">
         import * as THREE from 'three';
 
+        const regSceneState = {
+            mode: 'entry', // 'entry' | 'idle' | 'curtainExit' | 'cardIssued'
+        };
+
+        // ==================== 1. PENGENDALI TIRAI (SPLIT CURTAIN) & FORM REGISTER ====================
+        const curtain = document.getElementById('archival-curtain');
+        const badgeCode = document.getElementById('curtain-badge-code');
+        const badgeTitle = document.getElementById('curtain-badge-title');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const fromPage = sessionStorage.getItem('biblio_transition_from');
+            sessionStorage.removeItem('biblio_transition_from');
+
+            if (fromPage === 'login') {
+                badgeCode.textContent = 'ID // 01-AUTH ➔ ID // 02-REG';
+                badgeTitle.textContent = 'Membuka Formulir Keanggotaan...';
+            }
+
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    curtain.classList.add('is-open');
+                    curtain.classList.remove('is-interactive');
+                    document.body.classList.remove('curtain-closed');
+                    regSceneState.mode = 'idle';
+                }, 120);
+            });
+        });
+
+        function triggerCurtainNavigation(targetHref, linkType) {
+            regSceneState.mode = 'curtainExit';
+            sessionStorage.setItem('biblio_transition_from', 'register');
+
+            if (linkType === 'login') {
+                badgeCode.textContent = 'ID // 02-REG ➔ ID // 01-AUTH';
+                badgeTitle.textContent = 'Menuju Ruang Otentikasi...';
+            } else {
+                badgeCode.textContent = 'ID // 02-REG ➔ BERANDA';
+                badgeTitle.textContent = 'Kembali ke Beranda Arsip...';
+            }
+
+            curtain.classList.add('is-interactive');
+            curtain.classList.remove('is-open');
+            document.body.classList.add('curtain-closed');
+
+            setTimeout(() => {
+                window.location.href = targetHref;
+            }, 680);
+        }
+
+        document.querySelectorAll('[data-curtain-link]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                const href = link.getAttribute('href');
+                const type = link.getAttribute('data-curtain-link');
+                triggerCurtainNavigation(href, type);
+            });
+        });
+
+        // Intersepsi Submit Registrasi agar Kartu 3D Berputar & Tirai Menutup Halus ke Login
+        const registerForm = document.getElementById('registerForm');
+        const submitRegBtn = document.getElementById('submitRegBtn');
+        const submitRegText = document.getElementById('submitRegText');
+        const submitRegIcon = document.getElementById('submitRegIcon');
+        const regErrorBox = document.getElementById('regErrorBox');
+        const regErrorText = document.getElementById('regErrorText');
+
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                regErrorBox.classList.add('hidden');
+                regErrorBox.classList.remove('shake-error');
+                submitRegBtn.disabled = true;
+                submitRegText.textContent = 'Menerbitkan Kartu Anggota...';
+                submitRegIcon.className = 'fa-solid fa-circle-notch fa-spin text-[11px]';
+
+                try {
+                    const formData = new FormData(registerForm);
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result && result.ok) {
+                        regSceneState.mode = 'cardIssued';
+                        submitRegBtn.className = 'w-full bg-emerald-600 text-white font-medium py-3.5 px-6 rounded-lg text-xs uppercase font-mono tracking-wider transition-all duration-200 flex items-center justify-between shadow-sm';
+                        submitRegText.textContent = 'Kartu Anggota Diterbitkan!';
+                        submitRegIcon.className = 'fa-solid fa-check text-[11px]';
+
+                        setTimeout(() => {
+                            sessionStorage.setItem('biblio_transition_from', 'register');
+                            badgeCode.textContent = 'KARTU DITERBITKAN // RESMI';
+                            badgeTitle.textContent = 'Mengalihkan ke Ruang Masuk...';
+
+                            curtain.classList.add('is-interactive');
+                            curtain.classList.remove('is-open');
+                            document.body.classList.add('curtain-closed');
+                        }, 450);
+
+                        setTimeout(() => {
+                            window.location.href = result.redirect || 'login.php';
+                        }, 1150);
+                    } else {
+                        const msg = (result && result.message) ? result.message : 'Gagal memproses pendaftaran.';
+                        regErrorText.textContent = msg;
+                        regErrorBox.classList.remove('hidden');
+                        void regErrorBox.offsetWidth;
+                        regErrorBox.classList.add('shake-error');
+
+                        submitRegBtn.disabled = false;
+                        submitRegText.textContent = 'Terbitkan Akun Anggota';
+                        submitRegIcon.className = 'fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform';
+                    }
+                } catch (err) {
+                    registerForm.submit();
+                }
+            });
+        }
+
+        // ==================== 2. PANGGUNG 3D KARTU ANGGOTA THREE.JS ====================
         const container = document.getElementById('register-3d-stage');
         if (container) {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 0, 7.5);
+            camera.position.set(0, 0, 8.9); // Mulai sedikit lebih jauh untuk efek dolly-in saat tirai membuka
 
             const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
@@ -339,26 +575,22 @@ if (isset($_POST['register'])) {
             const cardGroup = new THREE.Group();
             scene.add(cardGroup);
 
-            // Membuat Canvas 2D Beresolusi Tinggi untuk Permukaan Depan Kartu
             const cardCanvas = document.createElement('canvas');
             cardCanvas.width = 1024;
             cardCanvas.height = 640;
             const ctx = cardCanvas.getContext('2d');
             const cardTexture = new THREE.CanvasTexture(cardCanvas);
 
-            // Fungsi Menggambar Permukaan Kartu Fisik
             function drawCardSurface(name, user) {
                 const displayName = (name && name.trim()) ? name.toUpperCase() : 'M. ZAIDAN FAIZ';
                 const displayUser = (user && user.trim()) ? '@' + user.toLowerCase() : '@zaidan';
 
-                // Latar Belakang Kartu (Matte Obsidian & Deep Navy)
                 const grad = ctx.createLinearGradient(0, 0, 1024, 640);
                 grad.addColorStop(0, '#0c1527');
                 grad.addColorStop(1, '#050914');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, 1024, 640);
 
-                // Pola Garis Teknis
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
                 ctx.lineWidth = 1;
                 for (let y = 40; y < 640; y += 40) {
@@ -368,11 +600,9 @@ if (isset($_POST['register'])) {
                     ctx.stroke();
                 }
 
-                // Garis Aksen Cobalt Biru di Atas
                 ctx.fillStyle = '#1d4ed8';
                 ctx.fillRect(0, 0, 1024, 18);
 
-                // Header Kartu
                 ctx.fillStyle = '#ffffff';
                 ctx.font = 'bold 36px "Newsreader", serif';
                 ctx.fillText('BIBLIOTHECA', 60, 90);
@@ -381,7 +611,6 @@ if (isset($_POST['register'])) {
                 ctx.font = 'bold 15px "Space Mono", monospace';
                 ctx.fillText('KARTU SIRKULASI PUSTAKA // DIGITAL PASS', 60, 120);
 
-                // Chip Logam EMV Emas
                 ctx.fillStyle = '#eab308';
                 ctx.beginPath();
                 ctx.roundRect(60, 160, 110, 85, 10);
@@ -390,12 +619,10 @@ if (isset($_POST['register'])) {
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
-                // Garis Sirkuit Chip
                 ctx.strokeStyle = '#a16207';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(85, 175, 60, 55);
 
-                // Data Anggota
                 ctx.fillStyle = '#94a3b8';
                 ctx.font = '14px "Space Mono", monospace';
                 ctx.fillText('NAMA PEMEGANG KARTU', 60, 310);
@@ -404,7 +631,6 @@ if (isset($_POST['register'])) {
                 ctx.font = 'bold 34px "Plus Jakarta Sans", sans-serif';
                 ctx.fillText(displayName, 60, 360);
 
-                // ID Pengguna & Status
                 ctx.fillStyle = '#94a3b8';
                 ctx.font = '14px "Space Mono", monospace';
                 ctx.fillText('ID PENGGUNA', 60, 440);
@@ -419,7 +645,6 @@ if (isset($_POST['register'])) {
                 ctx.font = 'bold 22px "Space Mono", monospace';
                 ctx.fillText('AKTIF // VIP', 420, 475);
 
-                // Barcode di Bawah
                 ctx.fillStyle = '#ffffff';
                 ctx.font = '24px monospace';
                 ctx.letterSpacing = '6px';
@@ -433,12 +658,10 @@ if (isset($_POST['register'])) {
                 cardTexture.needsUpdate = true;
             }
 
-            // Inisialisasi gambar kartu dengan nilai awal
             const inputNama = document.getElementById('namalengkap');
             const inputUser = document.getElementById('username');
             drawCardSurface(inputNama.value, inputUser.value);
 
-            // Membuat Bentuk Kartu 3D
             const cardGeometry = new THREE.BoxGeometry(4.2, 2.65, 0.06);
 
             const sideMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 });
@@ -453,14 +676,12 @@ if (isset($_POST['register'])) {
             const cardMesh = new THREE.Mesh(cardGeometry, materials);
             cardGroup.add(cardMesh);
 
-            // Cincin Geometri Orbit Tenang di Belakang Kartu
             const ringGeo = new THREE.TorusGeometry(3.2, 0.015, 16, 120);
             const ringMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.25 });
             const ring = new THREE.Mesh(ringGeo, ringMat);
             ring.rotation.x = Math.PI / 2.5;
             scene.add(ring);
 
-            // Pencahayaan
             const ambient = new THREE.AmbientLight(0xffffff, 1.6);
             scene.add(ambient);
 
@@ -472,7 +693,6 @@ if (isset($_POST['register'])) {
             sheenLight.position.set(-3, -2, 4);
             scene.add(sheenLight);
 
-            // Responsivitas Formulir ke Tekstur 3D secara Real-Time
             let tiltImpulse = 0;
             function triggerCardUpdate() {
                 drawCardSurface(inputNama.value, inputUser.value);
@@ -482,7 +702,6 @@ if (isset($_POST['register'])) {
             inputNama.addEventListener('input', triggerCardUpdate);
             inputUser.addEventListener('input', triggerCardUpdate);
 
-            // Interaksi Kursor Mouse
             let targetRotX = 0;
             let targetRotY = 0;
 
@@ -499,12 +718,21 @@ if (isset($_POST['register'])) {
                 requestAnimationFrame(animate);
                 const elapsed = clock.getElapsedTime();
 
-                // LERP rotasi kartu
-                cardGroup.rotation.y += (targetRotY - cardGroup.rotation.y) * 0.06;
-                cardGroup.rotation.x += (targetRotX + tiltImpulse - cardGroup.rotation.x) * 0.06;
-                tiltImpulse *= 0.92;
+                if (regSceneState.mode === 'cardIssued') {
+                    // Saat pendaftaran berhasil: Kartu mendekat & berputar penuh secara elegan
+                    camera.position.z += (6.2 - camera.position.z) * 0.08;
+                    cardGroup.rotation.y += 0.12;
+                    cardGroup.rotation.x += (0 - cardGroup.rotation.x) * 0.1;
+                } else if (regSceneState.mode === 'curtainExit') {
+                    camera.position.z += (8.8 - camera.position.z) * 0.08;
+                    cardGroup.rotation.y -= 0.04;
+                } else {
+                    camera.position.z += (7.5 - camera.position.z) * 0.06;
+                    cardGroup.rotation.y += (targetRotY - cardGroup.rotation.y) * 0.06;
+                    cardGroup.rotation.x += (targetRotX + tiltImpulse - cardGroup.rotation.x) * 0.06;
+                    tiltImpulse *= 0.92;
+                }
 
-                // Animasi mengambang tenang
                 cardGroup.position.y = Math.sin(elapsed * 1.5) * 0.08;
                 ring.rotation.z = elapsed * 0.08;
 
