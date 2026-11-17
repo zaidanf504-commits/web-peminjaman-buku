@@ -9,12 +9,12 @@ if (isset($_SESSION['UserID'])) {
 
 require 'koneksi.php';
 
-// Fallback jika koneksi database gagal (Palet Dark Blueprint #070D1E & Cobalt Brand #0052CC)
+// Fallback jika koneksi database gagal (Palet Dark Blueprint #060B19 & Cobalt Brand #0052CC)
 if (!$koneksi || (isset($koneksi->connect_error) && $koneksi->connect_error)) {
     http_response_code(503);
     exit('
-    <div style="font-family:\'Space Mono\',monospace;padding:3rem;text-align:center;color:#FFFFFF;background:#070D1E;background-image:radial-gradient(circle at 50% 35%, rgba(29,78,216,0.16), transparent 65%),linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);background-size:100% 100%, 36px 36px, 36px 36px;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;border:1px solid rgba(255,255,255,0.1);">
-        <div style="padding:0.35rem 0.85rem;border:1px solid rgba(147,197,253,0.35);background:#0F172A;border-radius:6px;font-size:0.75rem;letter-spacing:0.2em;color:#93C5FD;text-transform:uppercase;margin-bottom:1.25rem;">
+    <div style="font-family:\'Space Mono\',monospace;padding:3rem;text-align:center;color:#FFFFFF;background:#060B19;background-image:radial-gradient(circle at 50% 35%, rgba(29,78,216,0.18), transparent 65%),linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);background-size:100% 100%, 36px 36px, 36px 36px;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;border:1px solid rgba(255,255,255,0.08);">
+        <div style="padding:0.4rem 0.9rem;border:1px solid rgba(212,175,55,0.4);background:#0B1224;border-radius:6px;font-size:0.75rem;letter-spacing:0.2em;color:#D4AF37;text-transform:uppercase;margin-bottom:1.25rem;">
             [ SYS_ERR // 503_SERVICE_UNAVAILABLE ]
         </div>
         <h1 style="font-size:2.15rem;margin-bottom:0.75rem;font-weight:400;font-family:\'Newsreader\',Georgia,serif;color:#FFFFFF;letter-spacing:-0.01em;">
@@ -118,47 +118,48 @@ function esc($v): string
 }
 
 /**
- * Render sampul buku dengan palet Dark Blueprint (#070D1E, #0F172A, #172554, #1E293B)
+ * Render sampul buku dengan palet Dark Blueprint (#060B19, #0B1224, #111C38, #1E293B)
  * serta aksen Gold Foil (#D4AF37) dan Light Blue (#93C5FD) tanpa mengubah kontrak fungsi.
  */
 function bookCoverInner(array $buku, int $index): string
 {
-    $raw     = (string)($buku['Cover'] ?? '');
-    $hasFile = ($raw !== '' && $raw !== 'default.jpg' && file_exists(UPLOAD_PATH . $raw));
-    $judul   = esc($buku['Judul'] ?? 'Tanpa Judul');
-    $penulis = esc($buku['Penulis'] ?? 'Anonim');
-    $kat     = esc(trim((string)($buku['Kategori'] ?? '')) === '' ? 'Umum' : $buku['Kategori']);
+    $raw      = (string)($buku['Cover'] ?? '');
+    $hasFile  = ($raw !== '' && $raw !== 'default.jpg' && file_exists(UPLOAD_PATH . $raw));
+    $judul    = esc($buku['Judul'] ?? 'Tanpa Judul');
+    $penulis  = esc($buku['Penulis'] ?? 'Anonim');
+    $kat      = esc(trim((string)($buku['Kategori'] ?? '')) === '' ? 'Umum' : $buku['Kategori']);
     $tahunRaw = trim((string)($buku['TahunTerbit'] ?? ''));
-    $tahun   = $tahunRaw !== '' ? esc($tahunRaw) : 'ARSIP';
+    $tahun    = $tahunRaw !== '' ? esc($tahunRaw) : 'ARSIP';
 
     $palettes = [
-        ['bg' => '#070D1E', 'accent' => '#D4AF37', 'sub' => '#93C5FD', 'border' => '#172554'],
-        ['bg' => '#0F172A', 'accent' => '#93C5FD', 'sub' => '#D4AF37', 'border' => '#1E293B'],
-        ['bg' => '#172554', 'accent' => '#D4AF37', 'sub' => '#CBD5E1', 'border' => '#1D4ED8'],
-        ['bg' => '#1E293B', 'accent' => '#93C5FD', 'sub' => '#D4AF37', 'border' => '#0F172A'],
+        ['bg' => '#060B19', 'accent' => '#D4AF37', 'sub' => '#93C5FD', 'border' => '#172554'],
+        ['bg' => '#0B1224', 'accent' => '#93C5FD', 'sub' => '#D4AF37', 'border' => '#1E293B'],
+        ['bg' => '#111C38', 'accent' => '#D4AF37', 'sub' => '#CBD5E1', 'border' => '#1D4ED8'],
+        ['bg' => '#162033', 'accent' => '#93C5FD', 'sub' => '#D4AF37', 'border' => '#0F172A'],
     ];
     $p      = $palettes[$index % count($palettes)];
     $volNum = str_pad((string)($index + 1), 2, '0', STR_PAD_LEFT);
 
     if ($hasFile) {
         $src = UPLOAD_PATH . rawurlencode($raw);
-        return '<img src="' . esc($src) . '" alt="Sampul ' . $judul . '" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 ease-out">';
+        return '<img src="' . esc($src) . '" alt="Sampul ' . $judul . '" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]">';
     }
 
-    return '<div class="w-full h-full flex flex-col justify-between p-5 relative select-none overflow-hidden" style="background-color:' . $p['bg'] . '; border: 1px solid ' . $p['border'] . ';">'
-        . '<div class="absolute inset-2.5 pointer-events-none" style="border: 1px solid rgba(212, 175, 55, 0.28);"></div>'
-        . '<div class="absolute left-3.5 top-0 bottom-0 w-[1px]" style="background: rgba(255, 255, 255, 0.12);"></div>'
-        . '<div class="absolute left-0 top-0 bottom-0 w-3.5" style="background: linear-gradient(90deg, rgba(7,13,30,0.65) 0%, rgba(255,255,255,0.04) 85%, transparent 100%);"></div>'
-        . '<div class="pl-3.5 pr-1 pt-1 flex items-center justify-between border-b pb-2.5 relative z-10" style="border-color: rgba(255,255,255,0.1);">'
+    return '<div class="w-full h-full flex flex-col justify-between p-5 relative select-none overflow-hidden" style="background: radial-gradient(circle at 85% 15%, rgba(212,175,55,0.08), transparent 45%), ' . $p['bg'] . '; border: 1px solid ' . $p['border'] . ';">'
+        . '<div class="absolute inset-2.5 pointer-events-none" style="border: 1px solid rgba(212, 175, 55, 0.32);"></div>'
+        . '<div class="absolute inset-[13px] pointer-events-none" style="border: 1px solid rgba(255, 255, 255, 0.05);"></div>'
+        . '<div class="absolute left-3.5 top-0 bottom-0 w-[1px]" style="background: rgba(255, 255, 255, 0.14);"></div>'
+        . '<div class="absolute left-0 top-0 bottom-0 w-3.5" style="background: linear-gradient(90deg, rgba(4,8,18,0.82) 0%, rgba(255,255,255,0.06) 80%, transparent 100%);"></div>'
+        . '<div class="pl-3.5 pr-1 pt-1 flex items-center justify-between border-b pb-2.5 relative z-10" style="border-color: rgba(255,255,255,0.12);">'
         . '<span class="font-mono text-[9px] uppercase tracking-[0.16em] truncate max-w-[125px]" style="color:' . $p['accent'] . ';">' . $kat . '</span>'
         . '<span class="font-mono text-[9px] tnum" style="color:' . $p['sub'] . ';">' . $tahun . '</span>'
         . '</div>'
         . '<div class="pl-3.5 pr-1 my-auto py-3 relative z-10">'
-        . '<div class="w-6 h-[1px] mb-3" style="background-color:' . $p['accent'] . ';"></div>'
+        . '<div class="flex items-center gap-1.5 mb-3"><span class="w-6 h-[1px]" style="background-color:' . $p['accent'] . ';"></span><span class="w-1 h-1 rotate-45" style="background-color:' . $p['accent'] . ';"></span></div>'
         . '<h4 class="font-editorial text-lg sm:text-xl text-white leading-[1.2] line-clamp-3 italic font-normal tracking-tight">' . $judul . '</h4>'
         . '<p class="text-[10px] text-[#CBD5E1] mt-2.5 font-sans tracking-[0.12em] uppercase line-clamp-1">' . $penulis . '</p>'
         . '</div>'
-        . '<div class="pl-3.5 pr-1 pt-2.5 border-t flex items-center justify-between text-[9px] font-mono uppercase tracking-[0.18em] relative z-10 tnum" style="border-color: rgba(255,255,255,0.1); color: #CBD5E1;">'
+        . '<div class="pl-3.5 pr-1 pt-2.5 border-t flex items-center justify-between text-[9px] font-mono uppercase tracking-[0.18em] relative z-10 tnum" style="border-color: rgba(255,255,255,0.12); color: #CBD5E1;">'
         . '<span>BIBLIOTHECA</span>'
         . '<span style="color:' . $p['accent'] . ';">VOL.' . $volNum . '</span>'
         . '</div>'
@@ -173,7 +174,7 @@ function bookCoverInner(array $buku, int $index): string
   <title>Digital Library — BIBLIOTHECA | Arsip &amp; Sirkulasi Literatur</title>
   <meta name="description" content="Digital Library — BIBLIOTHECA. Sistem informasi arsip akademik dan sirkulasi peminjaman literatur fisik dengan eksplorasi buku 3D interaktif.">
 
-  <!-- Progressive Enhancement Flag: Menjamin konten tetap terlihat apabila JavaScript gagal dimuat -->
+  <!-- Progressive Enhancement Flag -->
   <script>document.documentElement.classList.add('js-enabled');</script>
 
   <!-- Tailwind CSS -->
@@ -199,9 +200,9 @@ function bookCoverInner(array $buku, int $index): string
         extend: {
           colors: {
             blueprint: {
-              950: '#070D1E',
-              900: '#0F172A',
-              800: '#172554',
+              950: '#060B19',
+              900: '#0B1224',
+              800: '#111C38',
               700: '#1E293B',
             },
             cobalt: {
@@ -210,15 +211,16 @@ function bookCoverInner(array $buku, int $index): string
               light: '#93C5FD',
             },
             editorial: {
-              bg: '#F4F5F7',
+              bg: '#F7F6F2',
               card: '#FFFFFF',
               primary: '#0F172A',
               ink: '#172B4D',
               secondary: '#42526E',
-              border: '#DFE1E6',
+              border: '#E5E3DC',
             },
             gold: {
               DEFAULT: '#D4AF37',
+              soft: '#E5C158',
             }
           },
           fontFamily: {
@@ -239,30 +241,37 @@ function bookCoverInner(array $buku, int $index): string
     }
 
     html, body {
-      background-color: #070D1E;
+      background-color: #060B19;
       color: #FFFFFF;
       overflow-x: hidden;
       font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
     }
 
-    /* Tabular numerals wajib untuk angka statistik dan indeks */
+    /* Tabular numerals untuk angka statistik dan indeks */
     .tnum {
       font-variant-numeric: tabular-nums;
       font-feature-settings: "tnum" 1, "zero" 1;
     }
 
-    /* Latar Blueprint Arsitektural dengan Radial Glow Cobalt Berintensitas Rendah */
+    /* Latar Blueprint Arsitektural dengan Pencahayaan Halus & Presisi */
     .blueprint-stage-surface {
-      background-color: #070D1E;
+      background-color: #060B19;
       background-image:
-        radial-gradient(circle at 74% 34%, rgba(29, 78, 216, 0.14), transparent 54%),
-        radial-gradient(circle at 18% 76%, rgba(0, 82, 204, 0.08), transparent 48%),
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+        radial-gradient(circle at 74% 32%, rgba(0, 82, 204, 0.16), transparent 52%),
+        radial-gradient(circle at 18% 78%, rgba(212, 175, 55, 0.05), transparent 46%),
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
     }
 
-    /* Status Stok sesuai Spesifikasi Identitas Visual */
+    /* Kartu Kaca Arsitektural Dark Blueprint */
+    .blueprint-panel {
+      background: linear-gradient(180deg, rgba(11, 18, 36, 0.92) 0%, rgba(8, 14, 29, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    /* Status Stok */
     .stock-badge-available {
       background-color: #E3FCEF;
       color: #006644;
@@ -284,7 +293,7 @@ function bookCoverInner(array $buku, int $index): string
       pointer-events: none;
     }
 
-    /* Fallback Buku Arsitektural Statis (Aktif saat WebGL nonaktif / mode statis) */
+    /* Fallback Buku Arsitektural Statis */
     #webgl-static-fallback {
       transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -296,14 +305,14 @@ function bookCoverInner(array $buku, int $index): string
       will-change: transform;
     }
 
-    /* Scroll Reveal dengan Kurva Transisi Utama cubic-bezier(0.16, 1, 0.3, 1) */
+    /* Scroll Reveal dengan Kurva Transisi Utama */
     .reveal-up {
       opacity: 1;
       transform: translateY(0);
     }
     .js-enabled .reveal-up {
       opacity: 0;
-      transform: translateY(22px);
+      transform: translateY(20px);
       transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .js-enabled .reveal-up.is-visible {
@@ -311,16 +320,48 @@ function bookCoverInner(array $buku, int $index): string
       transform: translateY(0);
     }
 
-    /* Interaksi Hover Kartu Katalog: Prioritaskan Border, Underline, dan Panah Kecil */
+    /* Navigasi Scroll-Spy Aktif */
+    .nav-link-item {
+      position: relative;
+      padding-bottom: 4px;
+    }
+    .nav-link-item::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2px;
+      height: 1.5px;
+      background: #D4AF37;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-link-item.is-active {
+      color: #FFFFFF;
+    }
+    .nav-link-item.is-active::after {
+      transform: scaleX(1);
+    }
+
+    /* Kartu Katalog dengan 3D Tilt & Ketebalan Lembaran Buku */
     .book-card {
-      border-radius: 8px;
-      transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      --rx: 0deg;
+      --ry: 0deg;
+      --gx: 50%;
+      --gy: 50%;
+      border-radius: 10px;
+      transform-style: preserve-3d;
+      transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+      transition:
+        border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .book-card:hover,
     .book-card:focus-visible {
       border-color: #0052CC;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px -8px rgba(15, 23, 42, 0.12);
+      box-shadow: 0 18px 36px -16px rgba(15, 23, 42, 0.18), 0 4px 12px -4px rgba(0, 82, 204, 0.08);
     }
     .book-card-title {
       text-decoration: underline;
@@ -341,12 +382,24 @@ function bookCoverInner(array $buku, int $index): string
       transform: translateX(4px);
     }
 
-    /* Efek Punggung Buku Halus pada Sampul 3:4 */
+    /* Efek Punggung Buku Kiri + Ketebalan Kertas Kanan pada Sampul 3:4 */
     .book-spine-surface {
       box-shadow:
-        inset 5px 0 10px -3px rgba(7, 13, 30, 0.65),
-        inset -1px 0 2px rgba(255, 255, 255, 0.14),
-        0 6px 14px -6px rgba(15, 23, 42, 0.28);
+        inset 6px 0 12px -3px rgba(4, 8, 18, 0.78),
+        inset -2px 0 4px rgba(255, 255, 255, 0.12),
+        3px 0 0 #E7E4DC,
+        4px 0 0 #CFCBC0,
+        6px 0 0 #F4F2EC,
+        7px 0 0 #C4BFB3,
+        0 10px 20px -10px rgba(15, 23, 42, 0.35);
+    }
+    .book-card:hover .book-cover-sheen {
+      opacity: 1;
+    }
+    .book-cover-sheen {
+      opacity: 0;
+      background: radial-gradient(circle at var(--gx) var(--gy), rgba(255, 255, 255, 0.16), transparent 62%);
+      transition: opacity 0.3s ease;
     }
 
     /* Slide-Over Book Inspection Drawer */
@@ -394,12 +447,13 @@ function bookCoverInner(array $buku, int $index): string
       #inspectionDrawer,
       #drawerBackdrop {
         transition-duration: 0.01ms !important;
+        transform: none !important;
       }
     }
 
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #070D1E; }
+    ::-webkit-scrollbar-track { background: #060B19; }
     ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #0052CC; }
   </style>
@@ -412,16 +466,16 @@ function bookCoverInner(array $buku, int $index): string
   </a>
 
   <!-- ==================== TOP SCROLL PROGRESS BAR ==================== -->
-  <div class="fixed top-0 left-0 right-0 h-[2px] bg-[#1E293B] z-[60]" aria-hidden="true">
-    <div id="scroll-progress" class="h-full bg-[#0052CC] w-full"></div>
+  <div class="fixed top-0 left-0 right-0 h-[2px] bg-white/10 z-[60]" aria-hidden="true">
+    <div id="scroll-progress" class="h-full bg-gradient-to-r from-[#0052CC] via-[#93C5FD] to-[#D4AF37] w-full"></div>
   </div>
 
   <!-- ==================== PANGGUNG WEBGL 3D & FALLBACK STATIS ==================== -->
   <div id="webgl-stage" aria-hidden="true">
     <!-- Komposisi Fallback Buku Arsitektural HTML/CSS (Tampil saat Reduced Motion / WebGL Fallback) -->
     <div id="webgl-static-fallback" class="hidden w-full h-full items-center justify-end pr-8 lg:pr-20 pointer-events-none">
-      <div class="w-64 sm:w-72 aspect-[3/4] rounded-[6px] bg-[#0F172A] border border-[#172554] p-6 flex flex-col justify-between relative shadow-2xl">
-        <div class="absolute inset-3 border border-[#D4AF37]/40 pointer-events-none"></div>
+      <div class="w-64 sm:w-72 aspect-[3/4] rounded-[6px] bg-[#0B1224] border border-[#172554] p-6 flex flex-col justify-between relative shadow-2xl">
+        <div class="absolute inset-3 border border-[#D4AF37]/45 pointer-events-none"></div>
         <div class="flex items-center justify-between border-b border-white/10 pb-3 font-mono text-[10px] text-[#93C5FD] tracking-[0.18em]">
           <span>VOL. I</span>
           <span>ID // ARCHIVE</span>
@@ -439,68 +493,79 @@ function bookCoverInner(array $buku, int $index): string
     </div>
   </div>
 
-  <!-- Kontrol Mode Kualitas Visual & Telemetri Tahap Scroll (Kanan Bawah Desktop) -->
-  <div class="fixed bottom-4 right-4 z-30 hidden md:flex items-center gap-2 bg-[#0F172A]/95 px-3 py-1.5 rounded-[6px] border border-white/10">
-    <span id="scene-phase-label" class="font-mono text-[10px] uppercase tracking-[0.14em] text-[#CBD5E1] tnum pr-2 border-r border-white/10">
+  <!-- Kontrol Interaktif 3D, Mode Kualitas Visual & Telemetri Tahap Scroll -->
+  <div class="fixed bottom-4 right-4 z-30 hidden md:flex items-center gap-2.5 bg-[#0B1224]/92 backdrop-blur-md px-3.5 py-2 rounded-[8px] border border-white/12 shadow-xl">
+    <span class="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" aria-hidden="true"></span>
+    <span id="scene-phase-label" class="font-mono text-[10px] uppercase tracking-[0.14em] text-[#CBD5E1] tnum pr-2.5 border-r border-white/10">
       STAGE 01 // HERO TOME
     </span>
+    <button
+      id="turnPageBtn"
+      type="button"
+      title="Balik lembaran buku 3D"
+      class="px-2 py-0.5 rounded-[4px] bg-[#111C38] hover:bg-[#0052CC] text-[#93C5FD] hover:text-white border border-white/10 font-mono text-[10px] uppercase tracking-wider transition-colors">
+      BALIK HALAMAN
+    </button>
     <label for="qualityModeSelect" class="sr-only">Mode Kualitas Visual 3D</label>
-    <select id="qualityModeSelect" class="bg-transparent font-mono text-[10px] uppercase tracking-[0.12em] text-[#93C5FD] focus:outline-none cursor-pointer">
-      <option value="standard" class="bg-[#0F172A] text-white">RENDER: STANDAR</option>
-      <option value="high" class="bg-[#0F172A] text-white">RENDER: TINGGI</option>
-      <option value="reduced" class="bg-[#0F172A] text-white">RENDER: STATIS</option>
+    <select id="qualityModeSelect" class="bg-transparent font-mono text-[10px] uppercase tracking-[0.12em] text-[#D4AF37] focus:outline-none cursor-pointer pl-1 border-l border-white/10">
+      <option value="standard" class="bg-[#0B1224] text-white">RENDER: STANDAR</option>
+      <option value="high" class="bg-[#0B1224] text-white">RENDER: TINGGI</option>
+      <option value="reduced" class="bg-[#0B1224] text-white">RENDER: STATIS</option>
     </select>
   </div>
 
-  <!-- ==================== 09. HEADER NAVIGASI ==================== -->
-  <header id="mainHeader" class="fixed top-0 left-0 right-0 z-40 bg-[#070D1E]/90 backdrop-blur-sm border-b border-white/10">
+  <!-- ==================== HEADER NAVIGASI ==================== -->
+  <header id="mainHeader" class="fixed top-0 left-0 right-0 z-40 bg-[#060B19]/88 backdrop-blur-md border-b border-white/[0.08]">
     <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
 
       <!-- Identitas Brand BIBLIOTHECA -->
       <a href="#beranda" class="flex items-center gap-3.5 group shrink-0">
-        <img src="logo/logo.png" alt="Logo Digital Library" class="w-9 h-9 object-contain" />
+        <div class="w-9 h-9 rounded-[6px] bg-[#0B1224] border border-white/10 flex items-center justify-center p-1 group-hover:border-[#D4AF37]/60 transition-colors">
+          <img src="logo/logo.png" alt="Logo Digital Library" class="w-full h-full object-contain" />
+        </div>
         <div class="flex flex-col">
           <div class="flex items-center gap-2">
             <span class="font-sans text-sm font-bold tracking-tight text-white leading-none">Digital Library</span>
-            <span class="font-mono text-[10px] tracking-[0.16em] text-[#93C5FD] uppercase hidden sm:inline">// DIGITAL LIBRARY</span>
+            <span class="font-mono text-[10px] tracking-[0.16em] text-[#D4AF37] uppercase hidden sm:inline">// BIBLIOTHECA</span>
           </div>
+          <span class="font-mono text-[9px] tracking-[0.18em] text-[#93C5FD]/80 uppercase mt-1 hidden sm:inline">ARCHIVAL CODEX SYSTEM</span>
         </div>
       </a>
 
-      <!-- Navigasi Utama -->
-      <nav aria-label="Navigasi Utama" class="hidden lg:flex items-center gap-7">
-        <a href="#beranda" class="font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
+      <!-- Navigasi Utama dengan Scroll-Spy -->
+      <nav aria-label="Navigasi Utama" class="hidden lg:flex items-center gap-8">
+        <a href="#beranda" data-nav-target="beranda" class="nav-link-item is-active font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
           <span class="text-[#93C5FD]">01.</span> Beranda
         </a>
-        <a href="#cara-kerja" class="font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
+        <a href="#cara-kerja" data-nav-target="cara-kerja" class="nav-link-item font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
           <span class="text-[#93C5FD]">02.</span> Sirkulasi
         </a>
-        <a href="#statistik" class="font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
+        <a href="#statistik" data-nav-target="statistik" class="nav-link-item font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
           <span class="text-[#93C5FD]">03.</span> Indeks Data
         </a>
-        <a href="#katalog" class="font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
+        <a href="#katalog" data-nav-target="katalog" class="nav-link-item font-mono text-xs uppercase tracking-[0.14em] text-[#CBD5E1] hover:text-white transition-colors">
           <span class="text-[#93C5FD]">04.</span> Katalog
         </a>
       </nav>
 
       <!-- CTA Masuk & Daftar -->
       <div class="hidden lg:flex items-center gap-3 shrink-0">
-        <a href="login.php" class="px-4 py-2 rounded-[6px] border border-white/15 font-mono text-xs uppercase tracking-wider text-white hover:border-[#93C5FD] transition-colors">
+        <a href="login.php" class="px-4 py-2 rounded-[6px] border border-white/15 font-mono text-xs uppercase tracking-wider text-white hover:border-[#93C5FD] hover:bg-white/[0.03] transition-colors">
           Masuk
         </a>
-        <a href="register.php" class="px-5 py-2.5 rounded-[6px] bg-[#0052CC] hover:bg-[#1D4ED8] text-white font-sans text-xs font-semibold tracking-wide transition-colors">
+        <a href="register.php" class="px-5 py-2.5 rounded-[6px] bg-[#0052CC] hover:bg-[#1D4ED8] text-white font-sans text-xs font-semibold tracking-wide transition-colors shadow-sm">
           Daftar
         </a>
       </div>
 
       <!-- Tombol Menu Mobile -->
-      <button id="mobileMenuBtn" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Buka Menu Navigasi" class="lg:hidden px-3.5 py-2 rounded-[6px] bg-[#0F172A] border border-white/15 font-mono text-[11px] uppercase tracking-widest text-white">
+      <button id="mobileMenuBtn" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Buka Menu Navigasi" class="lg:hidden px-3.5 py-2 rounded-[6px] bg-[#0B1224] border border-white/15 font-mono text-[11px] uppercase tracking-widest text-white">
         MENU
       </button>
     </div>
 
     <!-- Drawer Navigasi Mobile -->
-    <nav id="mobileMenu" aria-label="Navigasi Mobile" class="hidden lg:hidden bg-[#070D1E] border-b border-white/10 px-5 py-6">
+    <nav id="mobileMenu" aria-label="Navigasi Mobile" class="hidden lg:hidden bg-[#060B19] border-b border-white/10 px-5 py-6">
       <div class="flex flex-col gap-2 font-mono text-xs uppercase tracking-widest">
         <div class="pb-3 mb-1 border-b border-white/10 flex items-center justify-between text-[10px] text-[#CBD5E1] tnum">
           <span>ID // ARCHIVE</span>
@@ -538,12 +603,17 @@ function bookCoverInner(array $buku, int $index): string
     <section id="beranda" data-stage-section="hero" class="min-h-screen pt-24 sm:pt-28 pb-14 px-5 sm:px-8 max-w-7xl mx-auto flex flex-col justify-between">
 
       <!-- Grid Asimetris Hero: Kiri Tipografi & CTA, Kanan Panggung Buku 3D -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center my-auto py-10 lg:py-16">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center my-auto py-8 lg:py-14">
 
         <!-- Kolom Kiri: Tipografi & CTA -->
-        <div class="lg:col-span-7 flex flex-col gap-4 lg:gap-6 max-w-2xl">
+        <div class="lg:col-span-7 flex flex-col gap-5 lg:gap-6 max-w-2xl">
 
-          <h1 class="font-editorial text-4xl sm:text-6xl lg:text-[4.15rem] text-white leading-[1.06] tracking-[-0.015em] font-normal reveal-up" style="transition-delay: 60ms;">
+          <div class="inline-flex items-center gap-2.5 self-start px-3 py-1.5 rounded-[6px] bg-[#0B1224]/90 border border-white/10 font-mono text-[10px] uppercase tracking-[0.18em] text-[#93C5FD] reveal-up">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#D4AF37]"></span>
+            <span>BIBLIOTHECA // DIGITAL ARCHIVE &amp; CIRCULATION</span>
+          </div>
+
+          <h1 class="font-editorial text-4xl sm:text-6xl lg:text-[4.25rem] text-white leading-[1.05] tracking-[-0.015em] font-normal reveal-up" style="transition-delay: 60ms;">
             Arsitektur literatur dan <span class="italic font-normal text-[#93C5FD]">pencatatan sirkulasi</span> pustaka.
           </h1>
 
@@ -551,13 +621,13 @@ function bookCoverInner(array $buku, int $index): string
             <strong class="text-white font-semibold">Digital Library — BIBLIOTHECA</strong> mengintegrasikan katalog bibliografi fisik, pemantauan ketersediaan stok eksemplar dari pangkalan data, dan manajemen peminjaman anggota dalam satu ruang arsip terstruktur.
           </p>
 
-          <!-- Tombol Aksi Utama (Tidak Tertutup Canvas & Aksesibel via Keyboard) -->
-          <div class="flex flex-wrap items-center gap-4 pt-2 reveal-up" style="transition-delay: 180ms;">
-            <a href="#katalog" class="px-6 py-3.5 rounded-[6px] bg-[#0052CC] hover:bg-[#1D4ED8] text-white font-sans text-sm font-semibold tracking-wide transition-colors inline-flex items-center gap-3">
+          <!-- Tombol Aksi Utama -->
+          <div class="flex flex-wrap items-center gap-3.5 pt-2 reveal-up" style="transition-delay: 180ms;">
+            <a href="#katalog" class="px-6 py-3.5 rounded-[6px] bg-[#0052CC] hover:bg-[#1D4ED8] text-white font-sans text-sm font-semibold tracking-wide transition-colors inline-flex items-center gap-3 shadow-lg shadow-[#0052CC]/20">
               <span>Telusuri Katalog</span>
               <span class="font-mono text-xs text-[#93C5FD]">[04] &darr;</span>
             </a>
-            <a href="login.php" class="px-6 py-3.5 rounded-[6px] bg-[#0F172A] border border-white/15 text-white font-sans text-sm font-medium hover:border-[#93C5FD] transition-colors inline-flex items-center gap-2.5">
+            <a href="login.php" class="px-6 py-3.5 rounded-[6px] bg-[#0B1224] border border-white/15 text-white font-sans text-sm font-medium hover:border-[#93C5FD] transition-colors inline-flex items-center gap-2.5">
               <span>Masuk Akun</span>
               <span class="font-mono text-xs text-[#D4AF37]">&rarr;</span>
             </a>
@@ -568,37 +638,37 @@ function bookCoverInner(array $buku, int $index): string
 
           <!-- Ringkasan Parameter Sistem dengan Kode Arsip -->
           <div class="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl border-t border-white/10 reveal-up tnum" style="transition-delay: 240ms;">
-            <div class="p-3.5 rounded-[6px] bg-[#0F172A] border border-white/10">
+            <div class="p-3.5 rounded-[8px] blueprint-panel">
               <div class="font-mono text-[10px] tracking-[0.18em] text-[#93C5FD] uppercase">IDX-01 // CATALOG</div>
-              <div class="font-sans text-xs font-semibold text-white mt-1">Inspeksi Bibliografi</div>
-              <div class="font-sans text-[11px] text-[#CBD5E1] mt-0.5">Detail penerbit, tahun terbit, ISBN, dan klasifikasi rak.</div>
+              <div class="font-sans text-xs font-semibold text-white mt-1.5">Inspeksi Bibliografi</div>
+              <div class="font-sans text-[11px] text-[#CBD5E1] mt-1 leading-relaxed">Detail penerbit, tahun terbit, ISBN, dan klasifikasi rak.</div>
             </div>
-            <div class="p-3.5 rounded-[6px] bg-[#0F172A] border border-white/10">
+            <div class="p-3.5 rounded-[8px] blueprint-panel">
               <div class="font-mono text-[10px] tracking-[0.18em] text-[#D4AF37] uppercase">IDX-02 // QUOTA</div>
-              <div class="font-sans text-xs font-semibold text-white mt-1">Maks 3 Buku / 14 Hari</div>
-              <div class="font-sans text-[11px] text-[#CBD5E1] mt-0.5">Ketentuan standar peminjaman pada akun anggota.</div>
+              <div class="font-sans text-xs font-semibold text-white mt-1.5">Maks 3 Buku / 14 Hari</div>
+              <div class="font-sans text-[11px] text-[#CBD5E1] mt-1 leading-relaxed">Ketentuan standar peminjaman pada akun anggota.</div>
             </div>
-            <div class="p-3.5 rounded-[6px] bg-[#0F172A] border border-white/10">
+            <div class="p-3.5 rounded-[8px] blueprint-panel">
               <div class="font-mono text-[10px] tracking-[0.18em] text-[#93C5FD] uppercase">IDX-03 // STOCK</div>
-              <div class="font-sans text-xs font-semibold text-white mt-1">Status Stok Terdata</div>
-              <div class="font-sans text-[11px] text-[#CBD5E1] mt-0.5">Indikator ketersediaan eksemplar langsung dari tabel buku.</div>
+              <div class="font-sans text-xs font-semibold text-white mt-1.5">Status Stok Terdata</div>
+              <div class="font-sans text-[11px] text-[#CBD5E1] mt-1 leading-relaxed">Indikator ketersediaan eksemplar langsung dari tabel buku.</div>
             </div>
           </div>
         </div>
 
         <!-- Kolom Kanan: Ruang Panggung Buku Utama 3D & Keterangan Instalasi -->
-        <div class="lg:col-span-5 min-h-[280px] sm:min-h-[380px] lg:min-h-[500px] relative flex flex-col justify-end items-start lg:items-end pointer-events-none">
-          <div class="bg-[#0F172A]/90 border border-white/15 rounded-[8px] p-4 max-w-xs reveal-up">
+        <div class="lg:col-span-5 min-h-[300px] sm:min-h-[380px] lg:min-h-[500px] relative flex flex-col justify-end items-start lg:items-end pointer-events-none">
+          <div class="blueprint-panel backdrop-blur-md rounded-[8px] p-4 max-w-xs reveal-up pointer-events-auto">
             <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] pb-2 mb-2 border-b border-white/10">
               <span class="text-[#D4AF37]">VOL. I // HERO TOME</span>
-              <span class="text-[#93C5FD]">ID // ARCHIVE</span>
+              <span class="text-[#93C5FD]">INTERACTIVE 3D</span>
             </div>
             <p class="font-sans text-xs text-[#CBD5E1] leading-relaxed">
-              Instalasi buku hardcover <em>BIBLIOTHECA — ARCHIVE</em> merespons progres gulir halaman dari pembukaan lembaran hingga penutupan sampul.
+              Klik pada model buku 3D atau gulir halaman untuk mengamati lengkungan lembaran dan transisi sampul <em>BIBLIOTHECA — ARCHIVE</em>.
             </p>
             <div class="mt-3 pt-2 border-t border-white/10 flex items-center justify-between font-mono text-[10px] text-[#CBD5E1] uppercase tracking-widest tnum">
               <span>PROGRES DOKUMEN</span>
-              <span id="liveScrollPct" class="text-white">00%</span>
+              <span id="liveScrollPct" class="text-white font-bold">00%</span>
             </div>
           </div>
         </div>
@@ -622,7 +692,7 @@ function bookCoverInner(array $buku, int $index): string
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
 
         <!-- Kolom Kiri Sticky: Ringkasan Protokol Sirkulasi -->
-        <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-5 reveal-up bg-[#0F172A] p-7 rounded-[8px] border border-white/10">
+        <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-5 reveal-up blueprint-panel backdrop-blur-md p-7 rounded-[10px]">
           <div class="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-[#93C5FD] pb-3 border-b border-white/10">
             <span>02 // PROTOKOL SIRKULASI</span>
             <span class="text-[#D4AF37]">VOL. I</span>
@@ -633,7 +703,7 @@ function bookCoverInner(array $buku, int $index): string
           <p class="font-sans text-[#CBD5E1] text-sm sm:text-base leading-relaxed">
             Setiap tahapan dirancang agar anggota dapat memeriksa metadata buku di katalog publik sebelum melakukan peminjaman melalui portal akun terautentikasi.
           </p>
-          <div class="p-4 rounded-[6px] bg-[#070D1E] border border-white/10 font-mono text-[11px] text-[#CBD5E1] space-y-2 tnum">
+          <div class="p-4 rounded-[8px] bg-[#060B19]/90 border border-white/10 font-mono text-[11px] text-[#CBD5E1] space-y-2.5 tnum">
             <div class="text-[#D4AF37] uppercase tracking-wider">ATURAN PEMINJAMAN TERVERIFIKASI:</div>
             <div class="flex justify-between border-b border-white/5 pb-1.5">
               <span>Batas Pinjam Aktif:</span>
@@ -660,9 +730,9 @@ function bookCoverInner(array $buku, int $index): string
         <div class="lg:col-span-7 space-y-6">
 
           <!-- Tahap 01 -->
-          <div class="p-7 sm:p-8 bg-[#0F172A] rounded-[8px] border border-white/10 hover:border-[#0052CC] transition-colors reveal-up">
+          <div class="p-7 sm:p-8 blueprint-panel backdrop-blur-md rounded-[10px] hover:border-[#0052CC] transition-colors reveal-up">
             <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs mb-5 pb-4 border-b border-white/10 tnum">
-              <span class="px-2.5 py-1 rounded-[6px] bg-[#172554] text-[#93C5FD] border border-[#1D4ED8]/40">IDX-01 // AUTH</span>
+              <span class="px-2.5 py-1 rounded-[6px] bg-[#111C38] text-[#93C5FD] border border-[#1D4ED8]/40">IDX-01 // AUTH</span>
               <span class="text-[#CBD5E1] uppercase tracking-[0.16em]">OTENTIKASI ANGGOTA</span>
             </div>
             <h3 class="font-editorial text-2xl sm:text-3xl text-white mb-3 font-normal">
@@ -674,23 +744,23 @@ function bookCoverInner(array $buku, int $index): string
           </div>
 
           <!-- Tahap 02 -->
-          <div class="p-7 sm:p-8 bg-[#0F172A] rounded-[8px] border border-white/10 hover:border-[#0052CC] transition-colors reveal-up">
+          <div class="p-7 sm:p-8 blueprint-panel backdrop-blur-md rounded-[10px] hover:border-[#0052CC] transition-colors reveal-up">
             <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs mb-5 pb-4 border-b border-white/10 tnum">
-              <span class="px-2.5 py-1 rounded-[6px] bg-[#172554] text-[#D4AF37] border border-[#D4AF37]/40">IDX-02 // INSPECT</span>
+              <span class="px-2.5 py-1 rounded-[6px] bg-[#111C38] text-[#D4AF37] border border-[#D4AF37]/40">IDX-02 // INSPECT</span>
               <span class="text-[#CBD5E1] uppercase tracking-[0.16em]">INSPEKSI METADATA &amp; STOK</span>
             </div>
             <h3 class="font-editorial text-2xl sm:text-3xl text-white mb-3 font-normal">
               Periksa Ketersediaan dan Bibliografi Buku
             </h3>
             <p class="font-sans text-[#CBD5E1] text-sm sm:text-base leading-relaxed">
-              Cari koleksi menggunakan pintasan tombol <kbd class="font-mono text-xs text-[#93C5FD] bg-[#070D1E] px-1.5 py-0.5 rounded border border-white/15">/</kbd> atau saring berdasarkan kategori. Pilih kartu buku untuk membuka panel inspeksi yang memuat penerbit, tahun terbit, ISBN, dan jumlah stok aktual.
+              Cari koleksi menggunakan pintasan tombol <kbd class="font-mono text-xs text-[#93C5FD] bg-[#060B19] px-1.5 py-0.5 rounded border border-white/15">/</kbd> atau saring berdasarkan kategori. Pilih kartu buku untuk membuka panel inspeksi yang memuat penerbit, tahun terbit, ISBN, dan jumlah stok aktual.
             </p>
           </div>
 
           <!-- Tahap 03 -->
-          <div class="p-7 sm:p-8 bg-[#0F172A] rounded-[8px] border border-white/10 hover:border-[#0052CC] transition-colors reveal-up">
+          <div class="p-7 sm:p-8 blueprint-panel backdrop-blur-md rounded-[10px] hover:border-[#0052CC] transition-colors reveal-up">
             <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs mb-5 pb-4 border-b border-white/10 tnum">
-              <span class="px-2.5 py-1 rounded-[6px] bg-[#172554] text-[#93C5FD] border border-[#1D4ED8]/40">IDX-03 // BORROW</span>
+              <span class="px-2.5 py-1 rounded-[6px] bg-[#111C38] text-[#93C5FD] border border-[#1D4ED8]/40">IDX-03 // BORROW</span>
               <span class="text-[#CBD5E1] uppercase tracking-[0.16em]">SIRKULASI 14 HARI</span>
             </div>
             <h3 class="font-editorial text-2xl sm:text-3xl text-white mb-3 font-normal">
@@ -708,7 +778,7 @@ function bookCoverInner(array $buku, int $index): string
 
     <!-- ==================== STAGE 3: ARCHIVE STATISTICS LEDGER (55–80%) ==================== -->
     <section id="statistik" data-stage-section="statistics" class="py-24 px-5 sm:px-8 max-w-7xl mx-auto">
-      <div class="bg-[#0F172A]/95 rounded-[8px] border border-white/10 p-7 sm:p-12">
+      <div class="blueprint-panel backdrop-blur-md rounded-[10px] p-7 sm:p-12">
 
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-6 border-b border-white/10 gap-4 reveal-up">
           <div>
@@ -720,7 +790,7 @@ function bookCoverInner(array $buku, int $index): string
           </div>
         </div>
 
-        <!-- Empat Indeks Statistik Aktual (Tanpa Persentase Kapasitas Fiktif & Ramah Pembaca Layar) -->
+        <!-- Empat Indeks Statistik Aktual -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <?php
           $statsLedger = [
@@ -756,14 +826,14 @@ function bookCoverInner(array $buku, int $index): string
           foreach ($statsLedger as $idx => $st):
               $formattedVal = number_format((int)$st['value'], 0, ',', '.');
           ?>
-          <div class="p-6 rounded-[8px] bg-[#070D1E] border border-white/10 flex flex-col justify-between reveal-up" style="transition-delay: <?= $idx * 60; ?>ms;">
+          <div class="p-6 rounded-[8px] bg-[#060B19]/90 border border-white/10 hover:border-[#D4AF37]/40 transition-colors flex flex-col justify-between reveal-up" style="transition-delay: <?= $idx * 60; ?>ms;">
             <div>
               <div class="flex items-center justify-between font-mono text-[11px] text-[#CBD5E1] pb-3 mb-4 border-b border-white/10 tnum">
                 <span class="text-[#D4AF37] font-bold"><?= esc($st['code']); ?></span>
-                <span class="px-2 py-0.5 rounded-[4px] bg-[#172554] text-[#93C5FD] text-[10px]"><?= esc($st['unit']); ?></span>
+                <span class="px-2 py-0.5 rounded-[4px] bg-[#111C38] text-[#93C5FD] text-[10px]"><?= esc($st['unit']); ?></span>
               </div>
 
-              <!-- Nilai Statistik: Aksesibel langsung oleh Screen Reader & tetap tampil utuh bila JS nonaktif -->
+              <!-- Nilai Statistik -->
               <div class="font-mono text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2 tnum" aria-label="<?= esc($st['label'] . ': ' . $formattedVal); ?>">
                 <span class="sr-only"><?= esc($st['label'] . ': ' . $formattedVal); ?></span>
                 <span class="stat-counter" aria-hidden="true" data-target="<?= (int)$st['value']; ?>"><?= $formattedVal; ?></span>
@@ -785,14 +855,14 @@ function bookCoverInner(array $buku, int $index): string
     </section>
 
 
-    <!-- ==================== STAGE 4A: CATALOG SECTION (LIGHT EDITORIAL SURFACE) ==================== -->
-    <section id="katalog" data-stage-section="catalog" class="relative z-20 bg-[#F4F5F7] text-[#0F172A] border-y border-[#DFE1E6] py-24 px-5 sm:px-8">
+    <!-- ==================== STAGE 4A: CATALOG SECTION (WARM EDITORIAL SURFACE) ==================== -->
+    <section id="katalog" data-stage-section="catalog" class="relative z-20 bg-[#F7F6F2] text-[#0F172A] border-y border-[#E5E3DC] py-24 px-5 sm:px-8">
       <div class="max-w-7xl mx-auto">
 
-        <!-- Header Katalog Editorial Terang -->
-        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-[#DFE1E6] mb-8 reveal-up">
+        <!-- Header Katalog Editorial Hangat -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-[#E5E3DC] mb-8 reveal-up">
           <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-white border border-[#DFE1E6] font-mono text-[11px] uppercase tracking-[0.16em] text-[#0052CC] mb-3 tnum">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-white border border-[#E5E3DC] font-mono text-[11px] uppercase tracking-[0.16em] text-[#0052CC] mb-3 tnum shadow-2xs">
               <span>04 // KATALOG KOLEKSI</span>
               <span>&bull;</span>
               <span>ID // ARCHIVE</span>
@@ -808,9 +878,9 @@ function bookCoverInner(array $buku, int $index): string
           <!-- Kolom Pencarian Langsung dengan Shortcut (/) -->
           <div class="w-full lg:w-[420px] shrink-0">
             <label for="catalogSearch" class="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#42526E] mb-2">
-              CARI KOLEKSI (TEKAN <kbd class="px-1.5 py-0.5 bg-white border border-[#DFE1E6] rounded text-[#0F172A]">/</kbd> UNTUK FOKUS)
+              CARI KOLEKSI (TEKAN <kbd class="px-1.5 py-0.5 bg-white border border-[#E5E3DC] rounded text-[#0F172A]">/</kbd> UNTUK FOKUS)
             </label>
-            <div class="bg-white border border-[#DFE1E6] rounded-[8px] px-3.5 py-2.5 flex items-center gap-3 focus-within:border-[#0052CC] transition-colors">
+            <div class="bg-white border border-[#E5E3DC] rounded-[8px] px-3.5 py-2.5 flex items-center gap-3 focus-within:border-[#0052CC] focus-within:ring-2 focus-within:ring-[#0052CC]/10 transition-all shadow-2xs">
               <span class="font-mono text-[11px] text-[#42526E] select-none">[CARI]</span>
               <input
                 type="search"
@@ -819,7 +889,7 @@ function bookCoverInner(array $buku, int $index): string
                 placeholder="Judul, penulis, atau kategori..."
                 class="bg-transparent text-[#0F172A] text-sm placeholder:text-[#42526E]/70 focus:outline-none w-full font-sans"
               />
-              <button id="clearSearch" type="button" class="hidden px-2.5 py-1 rounded-[4px] bg-[#F4F5F7] hover:bg-[#DFE1E6] text-[#172B4D] font-mono text-[10px] uppercase tracking-wider transition-colors">
+              <button id="clearSearch" type="button" class="hidden px-2.5 py-1 rounded-[4px] bg-[#F7F6F2] hover:bg-[#E5E3DC] text-[#172B4D] font-mono text-[10px] uppercase tracking-wider transition-colors">
                 HAPUS
               </button>
             </div>
@@ -833,7 +903,7 @@ function bookCoverInner(array $buku, int $index): string
               Semua Kategori (<?= count($buku_showcase); ?>)
             </button>
             <?php foreach ($kategori_list as $kat): ?>
-            <button type="button" aria-pressed="false" class="filter-pill px-4 py-2 rounded-[6px] font-mono text-xs uppercase tracking-wider bg-white text-[#42526E] hover:text-[#0F172A] hover:border-[#0052CC] border border-[#DFE1E6] shrink-0 transition-colors" data-filter="<?= esc(mb_strtolower($kat)); ?>">
+            <button type="button" aria-pressed="false" class="filter-pill px-4 py-2 rounded-[6px] font-mono text-xs uppercase tracking-wider bg-white text-[#42526E] hover:text-[#0F172A] hover:border-[#0052CC] border border-[#E5E3DC] shrink-0 transition-colors" data-filter="<?= esc(mb_strtolower($kat)); ?>">
               <?= esc($kat); ?>
             </button>
             <?php endforeach; ?>
@@ -864,7 +934,7 @@ function bookCoverInner(array $buku, int $index): string
             role="button"
             aria-haspopup="dialog"
             aria-label="Inspeksi detail buku <?= esc($judulRaw); ?><?= $penulisRaw !== '' ? ' karya ' . esc($penulisRaw) : ''; ?>, status <?= $tersedia ? 'Tersedia ' . $stok . ' stok' : 'Stok habis'; ?>"
-            class="book-card bg-white border border-[#DFE1E6] p-4 flex flex-col justify-between cursor-pointer reveal-up"
+            class="book-card group bg-white border border-[#E5E3DC] p-4 flex flex-col justify-between cursor-pointer reveal-up"
             data-book-index="<?= (int)$idx; ?>"
             data-id="<?= $bukuId; ?>"
             data-kode="<?= esc($kodeArsip); ?>"
@@ -872,7 +942,7 @@ function bookCoverInner(array $buku, int $index): string
             data-cat="<?= esc(mb_strtolower($katRaw)); ?>">
 
             <div>
-              <!-- Header Kartu: Kategori & Status Stok Aktual (Dibedakan melalui Teks Simbol + Warna) -->
+              <!-- Header Kartu: Kategori & Status Stok Aktual -->
               <div class="flex items-center justify-between gap-2 mb-3">
                 <span class="font-mono text-[10px] uppercase tracking-wider text-[#42526E] truncate max-w-[130px]" title="<?= esc($katRaw); ?>">
                   <?= esc($katRaw); ?>
@@ -888,9 +958,12 @@ function bookCoverInner(array $buku, int $index): string
                 <?php endif; ?>
               </div>
 
-              <!-- Sampul Rasio 3:4 dengan Efek Punggung Buku -->
-              <div class="book-cover-slot aspect-[3/4] w-full overflow-hidden rounded-[6px] bg-[#070D1E] book-spine-surface mb-4 relative">
-                <?= bookCoverInner($buku, $idx); ?>
+              <!-- Sampul Rasio 3:4 dengan Efek Punggung Buku & Ketebalan Halaman -->
+              <div class="pr-1.5 mb-4">
+                <div class="book-cover-slot aspect-[3/4] w-full overflow-hidden rounded-l-[4px] rounded-r-[6px] bg-[#060B19] book-spine-surface relative">
+                  <?= bookCoverInner($buku, $idx); ?>
+                  <div class="book-cover-sheen absolute inset-0 pointer-events-none"></div>
+                </div>
               </div>
 
               <!-- Indeks Arsip, Judul & Penulis -->
@@ -908,7 +981,7 @@ function bookCoverInner(array $buku, int $index): string
             </div>
 
             <!-- Footer Kartu -->
-            <div class="pt-3.5 mt-4 border-t border-[#DFE1E6] flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-[#172B4D]">
+            <div class="pt-3.5 mt-4 border-t border-[#E5E3DC] flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-[#172B4D]">
               <span>Inspeksi Buku</span>
               <span class="book-card-arrow font-bold text-[#0052CC]">&rarr;</span>
             </div>
@@ -918,7 +991,7 @@ function bookCoverInner(array $buku, int $index): string
         </div>
 
         <!-- Empty State Ketika Hasil Filter/Pencarian Kosong -->
-        <div id="emptyCatalogState" class="hidden py-16 px-6 text-center bg-white rounded-[8px] border border-[#DFE1E6] my-6">
+        <div id="emptyCatalogState" class="hidden py-16 px-6 text-center bg-white rounded-[10px] border border-[#E5E3DC] my-6">
           <div class="font-mono text-xs uppercase tracking-[0.2em] text-[#0052CC] mb-2">[ ID // ARCHIVE_EMPTY ]</div>
           <h3 class="font-editorial text-2xl text-[#172B4D] mb-2 font-normal">Tidak ada buku yang cocok dengan kriteria pencarian.</h3>
           <p class="text-xs text-[#42526E] font-mono uppercase tracking-widest mb-6">Periksa ejaan kata kunci atau atur ulang filter kategori.</p>
@@ -935,7 +1008,7 @@ function bookCoverInner(array $buku, int $index): string
     <section data-stage-section="closing" class="py-24 sm:py-28 px-5 sm:px-8 max-w-7xl mx-auto relative z-10">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
-        <div class="lg:col-span-7 bg-[#0F172A]/95 rounded-[8px] border border-white/10 p-8 sm:p-12 reveal-up">
+        <div class="lg:col-span-7 blueprint-panel backdrop-blur-md rounded-[10px] p-8 sm:p-12 reveal-up">
           <div class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#D4AF37] mb-4">
             <span>VOL. I // PORTAL ANGGOTA</span>
           </div>
@@ -949,14 +1022,14 @@ function bookCoverInner(array $buku, int $index): string
             <a href="login.php" class="px-6 py-3.5 rounded-[6px] bg-[#0052CC] hover:bg-[#1D4ED8] text-white font-sans text-xs font-semibold uppercase tracking-wider transition-colors">
               Masuk ke Akun (login.php) &rarr;
             </a>
-            <a href="register.php" class="px-6 py-3.5 rounded-[6px] bg-[#070D1E] border border-white/15 hover:border-[#93C5FD] text-white font-sans text-xs font-semibold uppercase tracking-wider transition-colors">
+            <a href="register.php" class="px-6 py-3.5 rounded-[6px] bg-[#060B19] border border-white/15 hover:border-[#93C5FD] text-white font-sans text-xs font-semibold uppercase tracking-wider transition-colors">
               Daftar Anggota (register.php)
             </a>
           </div>
         </div>
 
         <div class="lg:col-span-5 flex flex-col justify-end lg:items-end pointer-events-none">
-          <div class="bg-[#0F172A]/90 border border-white/15 rounded-[8px] p-5 max-w-xs reveal-up">
+          <div class="blueprint-panel backdrop-blur-md rounded-[8px] p-5 max-w-xs reveal-up">
             <div class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#D4AF37] mb-1.5">
               STAGE 04 // ARCHIVE POSE
             </div>
@@ -973,7 +1046,7 @@ function bookCoverInner(array $buku, int $index): string
 
 
   <!-- ==================== FOOTER ==================== -->
-  <footer id="footer" class="relative z-20 bg-[#070D1E] border-t border-white/10 py-12 px-5 sm:px-8">
+  <footer id="footer" class="relative z-20 bg-[#060B19] border-t border-white/10 py-12 px-5 sm:px-8">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 font-mono text-xs text-[#CBD5E1]">
       <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
         <span class="text-white font-bold tracking-wider">Digital Library — BIBLIOTHECA</span>
@@ -992,26 +1065,26 @@ function bookCoverInner(array $buku, int $index): string
   </footer>
 
 
-  <!-- ==================== 12. SLIDE-OVER BOOK INSPECTION DRAWER ==================== -->
-  <div id="drawerBackdrop" class="fixed inset-0 z-50 bg-[#070D1E]/75 backdrop-blur-xs" aria-hidden="true"></div>
+  <!-- ==================== SLIDE-OVER BOOK INSPECTION DRAWER ==================== -->
+  <div id="drawerBackdrop" class="fixed inset-0 z-50 bg-[#060B19]/75 backdrop-blur-sm" aria-hidden="true"></div>
 
   <aside
     id="inspectionDrawer"
     aria-labelledby="drawerJudul"
     aria-modal="true"
     role="dialog"
-     aria-hidden="true"
+    aria-hidden="true"
     tabindex="-1"
-    class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-white text-[#0F172A] border-l border-[#DFE1E6] shadow-2xl flex flex-col justify-between overflow-y-auto">
+    class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-md bg-white text-[#0F172A] border-l border-[#E5E3DC] shadow-2xl flex flex-col justify-between overflow-y-auto">
 
     <div>
       <!-- Header Panel Detail -->
-      <div class="sticky top-0 z-20 bg-white/95 backdrop-blur-xs px-6 py-4 border-b border-[#DFE1E6] flex items-center justify-between gap-3">
+      <div class="sticky top-0 z-20 bg-white/95 backdrop-blur-sm px-6 py-4 border-b border-[#E5E3DC] flex items-center justify-between gap-3">
         <div>
           <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#0052CC] block tnum" id="drawerKodeArsip">IDX-01 // INSPEKSI BUKU</span>
           <h4 class="font-sans text-xs font-bold uppercase tracking-wider text-[#172B4D]">Detail Bibliografi &amp; Stok</h4>
         </div>
-        <button id="closeDrawerBtn" type="button" aria-label="Tutup Panel Detail Buku" class="px-3 py-1.5 rounded-[6px] bg-[#F4F5F7] hover:bg-[#DFE1E6] text-[#0F172A] font-mono text-xs uppercase tracking-wider transition-colors">
+        <button id="closeDrawerBtn" type="button" aria-label="Tutup Panel Detail Buku" class="px-3 py-1.5 rounded-[6px] bg-[#F7F6F2] hover:bg-[#E5E3DC] text-[#0F172A] font-mono text-xs uppercase tracking-wider transition-colors">
           TUTUP [ESC]
         </button>
       </div>
@@ -1020,10 +1093,12 @@ function bookCoverInner(array $buku, int $index): string
       <div class="p-6 space-y-6">
 
         <!-- Sampul Besar & Identitas Utama -->
-        <div class="flex flex-col sm:flex-row gap-5 items-start bg-[#F4F5F7] p-4 rounded-[8px] border border-[#DFE1E6]">
-          <div id="drawerCoverPreview" class="w-32 sm:w-28 aspect-[3/4] rounded-[6px] overflow-hidden shrink-0 book-spine-surface bg-[#070D1E]"></div>
+        <div class="flex flex-col sm:flex-row gap-5 items-start bg-[#F7F6F2] p-4 rounded-[8px] border border-[#E5E3DC]">
+          <div class="pr-1.5 shrink-0">
+            <div id="drawerCoverPreview" class="w-32 sm:w-28 aspect-[3/4] rounded-l-[4px] rounded-r-[6px] overflow-hidden book-spine-surface bg-[#060B19]"></div>
+          </div>
           <div class="flex-1 min-w-0">
-            <div class="inline-block px-2.5 py-0.5 rounded-[4px] bg-white border border-[#DFE1E6] font-mono text-[10px] uppercase tracking-wider text-[#0052CC] mb-2" id="drawerKategori">
+            <div class="inline-block px-2.5 py-0.5 rounded-[4px] bg-white border border-[#E5E3DC] font-mono text-[10px] uppercase tracking-wider text-[#0052CC] mb-2" id="drawerKategori">
               KATEGORI
             </div>
             <h3 class="font-editorial text-2xl text-[#172B4D] leading-snug font-normal break-words" id="drawerJudul">
@@ -1042,12 +1117,12 @@ function bookCoverInner(array $buku, int $index): string
           </div>
         </div>
 
-        <!-- Tabel Metadata (Hanya menampilkan baris metadata yang tersedia) -->
-        <div class="border border-[#DFE1E6] rounded-[8px] overflow-hidden">
-          <div class="bg-[#F4F5F7] px-4 py-2.5 border-b border-[#DFE1E6] font-mono text-[10px] uppercase tracking-[0.16em] text-[#42526E]">
+        <!-- Tabel Metadata -->
+        <div class="border border-[#E5E3DC] rounded-[8px] overflow-hidden">
+          <div class="bg-[#F7F6F2] px-4 py-2.5 border-b border-[#E5E3DC] font-mono text-[10px] uppercase tracking-[0.16em] text-[#42526E]">
             METADATA KATALOG
           </div>
-          <dl class="divide-y divide-[#DFE1E6] font-mono text-xs tnum">
+          <dl class="divide-y divide-[#E5E3DC] font-mono text-xs tnum">
             <div id="drawerRowKategori" class="px-4 py-3 flex justify-between gap-4">
               <dt class="text-[#42526E] uppercase">Kategori</dt>
               <dd class="text-[#0052CC] font-bold text-right" id="drawerKategoriMeta">-</dd>
@@ -1068,7 +1143,7 @@ function bookCoverInner(array $buku, int $index): string
         </div>
 
         <!-- Aturan Peminjaman Terverifikasi -->
-        <div class="p-4 rounded-[8px] bg-[#F4F5F7] border border-[#DFE1E6] space-y-2">
+        <div class="p-4 rounded-[8px] bg-[#F7F6F2] border border-[#E5E3DC] space-y-2">
           <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.15em] text-[#172B4D] font-bold">
             <span>ATURAN PEMINJAMAN</span>
             <span class="text-[#0052CC]">TERVERIFIKASI</span>
@@ -1082,12 +1157,12 @@ function bookCoverInner(array $buku, int $index): string
     </div>
 
     <!-- Footer CTA Slide-Over Panel -->
-    <div class="sticky bottom-0 z-20 bg-white border-t border-[#DFE1E6] p-6 space-y-2.5">
+    <div class="sticky bottom-0 z-20 bg-white border-t border-[#E5E3DC] p-6 space-y-2.5">
       <a id="drawerPinjamCta" href="login.php" class="w-full py-3.5 px-5 rounded-[6px] bg-[#0052CC] hover:bg-[#1D4ED8] text-white font-sans text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2">
         <span>Pinjam Buku Ini (Masuk)</span>
         <span class="font-mono">&rarr;</span>
       </a>
-      <button id="closeDrawerSecondary" type="button" class="w-full py-2.5 px-4 rounded-[6px] bg-[#F4F5F7] hover:bg-[#DFE1E6] text-[#42526E] font-mono text-xs uppercase tracking-wider transition-colors">
+      <button id="closeDrawerSecondary" type="button" class="w-full py-2.5 px-4 rounded-[6px] bg-[#F7F6F2] hover:bg-[#E5E3DC] text-[#42526E] font-mono text-xs uppercase tracking-wider transition-colors">
         Kembali ke Katalog
       </button>
     </div>
@@ -1119,7 +1194,6 @@ function bookCoverInner(array $buku, int $index): string
   <script type="module">
     import * as THREE from 'three';
 
-    // Parse data katalog yang telah diserialisasi dengan aman dari PHP
     let catalogData = [];
     try {
       const rawJson = document.getElementById('catalogArchiveJson')?.textContent;
@@ -1138,7 +1212,7 @@ function bookCoverInner(array $buku, int $index): string
     });
 
     /* ============================================================================
-     * 1. INTERAKSI UI, FILTER KATALOG, SLIDE-OVER DRAWER & AKSESIBILITAS
+     * 1. INTERAKSI UI, SCROLL-SPY, 3D CARD TILT, FILTER & SLIDE-OVER DRAWER
      * ============================================================================ */
     function initUIInteractions(books) {
       // Navigasi Mobile
@@ -1162,6 +1236,27 @@ function bookCoverInner(array $buku, int $index): string
         });
       }
 
+      // Scroll-Spy Navigasi Utama
+      const navLinks = document.querySelectorAll('.nav-link-item[data-nav-target]');
+      const trackedSections = ['beranda', 'cara-kerja', 'statistik', 'katalog']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+
+      if ('IntersectionObserver' in window && navLinks.length > 0 && trackedSections.length > 0) {
+        const navObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const targetId = entry.target.id;
+              navLinks.forEach(link => {
+                link.classList.toggle('is-active', link.dataset.navTarget === targetId);
+              });
+            }
+          });
+        }, { rootMargin: '-35% 0px -50% 0px', threshold: 0.01 });
+
+        trackedSections.forEach(sec => navObserver.observe(sec));
+      }
+
       // Scroll Reveal dengan IntersectionObserver
       const revealEls = document.querySelectorAll('.reveal-up');
       if (prefersReducedMotionQuery.matches || !('IntersectionObserver' in window)) {
@@ -1178,7 +1273,7 @@ function bookCoverInner(array $buku, int $index): string
         revealEls.forEach(el => revealObserver.observe(el));
       }
 
-      // Counter Statistik (Nilai asli sudah ada di DOM & sr-only; animasi hanya efek visual)
+      // Counter Statistik
       const counters = document.querySelectorAll('.stat-counter');
       if (!prefersReducedMotionQuery.matches && 'IntersectionObserver' in window) {
         const counterObserver = new IntersectionObserver((entries) => {
@@ -1261,7 +1356,7 @@ function bookCoverInner(array $buku, int $index): string
           p.classList.toggle('border-[#0052CC]', isMatch);
           p.classList.toggle('bg-white', !isMatch);
           p.classList.toggle('text-[#42526E]', !isMatch);
-          p.classList.toggle('border-[#DFE1E6]', !isMatch);
+          p.classList.toggle('border-[#E5E3DC]', !isMatch);
         });
         filterCatalog();
       }
@@ -1290,6 +1385,29 @@ function bookCoverInner(array $buku, int $index): string
             searchInput.value = '';
           }
           setActiveCategoryPill('all');
+        });
+      }
+
+      // Tactile 3D Perspective Hover Tilt pada Kartu Buku Katalog
+      const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+      if (!isCoarsePointer && !prefersReducedMotionQuery.matches) {
+        bookCards.forEach(card => {
+          card.addEventListener('pointermove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const nx = (e.clientX - rect.left) / rect.width;
+            const ny = (e.clientY - rect.top) / rect.height;
+            const rotY = ((nx - 0.5) * 6).toFixed(2);
+            const rotX = ((0.5 - ny) * 6).toFixed(2);
+            card.style.setProperty('--rx', `${rotX}deg`);
+            card.style.setProperty('--ry', `${rotY}deg`);
+            card.style.setProperty('--gx', `${(nx * 100).toFixed(1)}%`);
+            card.style.setProperty('--gy', `${(ny * 100).toFixed(1)}%`);
+          }, { passive: true });
+
+          card.addEventListener('pointerleave', () => {
+            card.style.setProperty('--rx', '0deg');
+            card.style.setProperty('--ry', '0deg');
+          }, { passive: true });
         });
       }
 
@@ -1356,6 +1474,9 @@ function bookCoverInner(array $buku, int $index): string
         if (coverSlot && drawerCover) {
           drawerCover.replaceChildren();
           Array.from(coverSlot.childNodes).forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('book-cover-sheen')) {
+              return;
+            }
             drawerCover.appendChild(node.cloneNode(true));
           });
         }
@@ -1371,7 +1492,6 @@ function bookCoverInner(array $buku, int $index): string
           stokText.textContent = '[STOK HABIS • 0 EKSEMPLAR]';
         }
 
-        // Kunci scroll halaman belakang tanpa menggeser layout
         const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
         document.body.style.paddingRight = scrollbarWidth > 0 ? `${scrollbarWidth}px` : '';
         document.body.style.overflow = 'hidden';
@@ -1424,7 +1544,7 @@ function bookCoverInner(array $buku, int $index): string
         if (e.key === '/' && !isEditable && !drawer?.classList.contains('is-open')) {
           e.preventDefault();
           searchInput?.focus();
-          searchInput?.scrollIntoView({ behavior: ' prefersReducedMotionQuery.matches ? "auto" : "smooth"', block: 'center' });
+          searchInput?.scrollIntoView({ behavior: prefersReducedMotionQuery.matches ? 'auto' : 'smooth', block: 'center' });
           return;
         }
 
@@ -1439,7 +1559,6 @@ function bookCoverInner(array $buku, int $index): string
           return;
         }
 
-        // Focus Trap saat Slide-Over Drawer terbuka
         if (e.key === 'Tab' && drawer?.classList.contains('is-open')) {
           const focusable = drawer.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
           if (focusable.length === 0) return;
@@ -1465,13 +1584,13 @@ function bookCoverInner(array $buku, int $index): string
       const container = document.getElementById('webgl-stage');
       const staticFallback = document.getElementById('webgl-static-fallback');
       const qualitySelect = document.getElementById('qualityModeSelect');
+      const turnPageBtn = document.getElementById('turnPageBtn');
       const progressBar = document.getElementById('scroll-progress');
       const phaseLabel = document.getElementById('scene-phase-label');
       const liveScrollPct = document.getElementById('liveScrollPct');
 
       if (!container) return;
 
-      // Deteksi kapabilitas perangkat & prefers-reduced-motion untuk menentukan mode awal
       const isLowPowerDevice = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
       let currentQuality = prefersReducedMotionQuery.matches
         ? 'reduced'
@@ -1481,7 +1600,6 @@ function bookCoverInner(array $buku, int $index): string
         qualitySelect.value = currentQuality;
       }
 
-      // Coba inisialisasi WebGLRenderer tunggal dengan fallback aman
       let renderer = null;
       try {
         renderer = new THREE.WebGLRenderer({
@@ -1504,21 +1622,52 @@ function bookCoverInner(array $buku, int $index): string
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.12;
+      renderer.toneMappingExposure = 1.16;
       container.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x070D1E, 0.034);
+      scene.fog = new THREE.FogExp2(0x060B19, 0.032);
 
-      const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 80);
+      const camera = new THREE.PerspectiveCamera(37, window.innerWidth / window.innerHeight, 0.1, 80);
       camera.position.set(0, 1.15, 8.8);
 
-      // --- PENCAHAYAAN TERUKUR (Dark Blueprint Cobalt + Gold Foil) ---
-      const ambientLight = new THREE.AmbientLight(0xCBD5E1, 0.62);
+      // --- STUDIO ENVIRONMENT MAP (PMREM) UNTUK KILAU GOLD FOIL REALISTIS ---
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      const envScene = new THREE.Scene();
+      envScene.background = new THREE.Color(0x081026);
+
+      const envPanelGeo = new THREE.PlaneGeometry(8, 8);
+      const warmPanelMat = new THREE.MeshBasicMaterial({ color: 0xFFF3D1, side: THREE.DoubleSide });
+      const coolPanelMat = new THREE.MeshBasicMaterial({ color: 0x3B82F6, side: THREE.DoubleSide });
+      const goldPanelMat = new THREE.MeshBasicMaterial({ color: 0xE5C158, side: THREE.DoubleSide });
+
+      const warmPanel = new THREE.Mesh(envPanelGeo, warmPanelMat);
+      warmPanel.position.set(5, 6, 5);
+      warmPanel.lookAt(0, 0, 0);
+
+      const coolPanel = new THREE.Mesh(envPanelGeo, coolPanelMat);
+      coolPanel.position.set(-6, 2, -4);
+      coolPanel.lookAt(0, 0, 0);
+
+      const goldPanel = new THREE.Mesh(envPanelGeo, goldPanelMat);
+      goldPanel.position.set(0, -6, 3);
+      goldPanel.lookAt(0, 0, 0);
+
+      envScene.add(warmPanel, coolPanel, goldPanel);
+      const envRenderTarget = pmremGenerator.fromScene(envScene, 0.04);
+      scene.environment = envRenderTarget.texture;
+      envPanelGeo.dispose();
+      warmPanelMat.dispose();
+      coolPanelMat.dispose();
+      goldPanelMat.dispose();
+      pmremGenerator.dispose();
+
+      // --- PENCAHAYAAN ARSITEKTURAL ---
+      const ambientLight = new THREE.AmbientLight(0xCBD5E1, 0.55);
       scene.add(ambientLight);
 
-      const keyLight = new THREE.DirectionalLight(0xFFFBEB, 2.15);
-      keyLight.position.set(4.2, 6.2, 5.2);
+      const keyLight = new THREE.DirectionalLight(0xFFFBEB, 2.25);
+      keyLight.position.set(4.5, 6.5, 5.4);
       keyLight.castShadow = true;
       keyLight.shadow.mapSize.width = 1024;
       keyLight.shadow.mapSize.height = 1024;
@@ -1526,12 +1675,12 @@ function bookCoverInner(array $buku, int $index): string
       keyLight.shadow.camera.far = 18;
       scene.add(keyLight);
 
-      const cobaltRimLight = new THREE.PointLight(0x0052CC, 5.8, 16);
-      cobaltRimLight.position.set(-4.0, 2.4, -2.6);
+      const cobaltRimLight = new THREE.PointLight(0x0052CC, 6.2, 16);
+      cobaltRimLight.position.set(-4.2, 2.4, -2.5);
       scene.add(cobaltRimLight);
 
-      const lightBlueFill = new THREE.PointLight(0x93C5FD, 2.8, 13);
-      lightBlueFill.position.set(2.2, -1.8, 3.4);
+      const lightBlueFill = new THREE.PointLight(0x93C5FD, 2.6, 14);
+      lightBlueFill.position.set(2.4, -1.8, 3.6);
       scene.add(lightBlueFill);
 
       // --- GENERATOR TEKSTUR PROSEDURAL CANVAS 2D ---
@@ -1549,25 +1698,25 @@ function bookCoverInner(array $buku, int $index): string
         canvas.height = 1408;
         const ctx = canvas.getContext('2d');
 
-        // Permukaan Sampul Dark Blueprint (#070D1E -> #0F172A -> #172554)
+        // Permukaan Sampul Dark Blueprint (#060B19 -> #0B1224 -> #111C38)
         const grad = ctx.createLinearGradient(0, 0, 1024, 1408);
-        grad.addColorStop(0, '#070D1E');
-        grad.addColorStop(0.55, '#0F172A');
-        grad.addColorStop(1, '#172554');
+        grad.addColorStop(0, '#060B19');
+        grad.addColorStop(0.55, '#0B1224');
+        grad.addColorStop(1, '#111C38');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 1024, 1408);
 
         // Tekstur Serat Linen/Buckram Prosedural Halus
-        ctx.strokeStyle = 'rgba(147, 197, 253, 0.035)';
+        ctx.strokeStyle = 'rgba(147, 197, 253, 0.032)';
         ctx.lineWidth = 1;
-        for (let x = 0; x < 1024; x += 8) {
+        for (let x = 0; x < 1024; x += 6) {
           ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1408); ctx.stroke();
         }
-        for (let y = 0; y < 1408; y += 8) {
+        for (let y = 0; y < 1408; y += 6) {
           ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1024, y); ctx.stroke();
         }
 
-        // Bingkai Emas Tipis dan Presisi (#D4AF37)
+        // Bingkai Emas Tipis & Presisi (#D4AF37)
         ctx.strokeStyle = '#D4AF37';
         ctx.lineWidth = 5;
         ctx.strokeRect(58, 58, 908, 1292);
@@ -1587,9 +1736,9 @@ function bookCoverInner(array $buku, int $index): string
         ctx.lineWidth = 3;
         corners.forEach(([cx, cy, sx, sy]) => {
           ctx.beginPath();
-          ctx.moveTo(cx + sx * 44, cy + sy * 18);
+          ctx.moveTo(cx + sx * 48, cy + sy * 18);
           ctx.lineTo(cx + sx * 18, cy + sy * 18);
-          ctx.lineTo(cx + sx * 18, cy + sy * 44);
+          ctx.lineTo(cx + sx * 18, cy + sy * 48);
           ctx.stroke();
         });
 
@@ -1612,24 +1761,30 @@ function bookCoverInner(array $buku, int $index): string
         ctx.font = '400 32px "Newsreader", Georgia, serif';
         ctx.fillText('— ARCHIVE —', 512, 402);
 
-        // Diagram Geometri Arsitektural Buku di Tengah Sampul
+        // Diagram Geometri Astrolabe Buku di Tengah Sampul
         ctx.save();
         ctx.translate(512, 745);
         ctx.strokeStyle = '#D4AF37';
         ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(0, 0, 165, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, 172, 0, Math.PI * 2); ctx.stroke();
 
         ctx.strokeStyle = 'rgba(147, 197, 253, 0.45)';
         ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.arc(0, 0, 126, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeRect(-90, -90, 180, 180);
+        ctx.beginPath(); ctx.arc(0, 0, 132, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeRect(-92, -92, 184, 184);
 
-        for (let i = 0; i < 8; i++) {
-          const ang = (i / 8) * Math.PI * 2;
-          ctx.strokeStyle = i % 2 === 0 ? '#D4AF37' : 'rgba(212, 175, 55, 0.35)';
+        ctx.save();
+        ctx.rotate(Math.PI / 4);
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+        ctx.strokeRect(-92, -92, 184, 184);
+        ctx.restore();
+
+        for (let i = 0; i < 12; i++) {
+          const ang = (i / 12) * Math.PI * 2;
+          ctx.strokeStyle = i % 3 === 0 ? '#D4AF37' : 'rgba(212, 175, 55, 0.3)';
           ctx.beginPath();
-          ctx.moveTo(Math.cos(ang) * 70, Math.sin(ang) * 70);
-          ctx.lineTo(Math.cos(ang) * 165, Math.sin(ang) * 165);
+          ctx.moveTo(Math.cos(ang) * 68, Math.sin(ang) * 68);
+          ctx.lineTo(Math.cos(ang) * 172, Math.sin(ang) * 172);
           ctx.stroke();
         }
         ctx.restore();
@@ -1648,18 +1803,64 @@ function bookCoverInner(array $buku, int $index): string
         return trackTex(tex);
       }
 
+      function createBuckramBumpTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#808080';
+        ctx.fillRect(0, 0, 256, 256);
+
+        for (let y = 0; y < 256; y += 2) {
+          for (let x = 0; x < 256; x += 2) {
+            const v = ((x + y) % 4 === 0) ? 148 : 112;
+            ctx.fillStyle = `rgb(${v},${v},${v})`;
+            ctx.fillRect(x, y, 2, 2);
+          }
+        }
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(16, 22);
+        return trackTex(tex);
+      }
+
+      function createEndpaperTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 704;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#0B1224';
+        ctx.fillRect(0, 0, 512, 704);
+
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.22)';
+        ctx.lineWidth = 1;
+        for (let y = 24; y < 704; y += 32) {
+          for (let x = 24; x < 512; x += 32) {
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+        ctx.strokeStyle = 'rgba(147, 197, 253, 0.35)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(20, 20, 472, 664);
+
+        return trackTex(new THREE.CanvasTexture(canvas));
+      }
+
       function createPageEdgeStriationTexture() {
         const canvas = document.createElement('canvas');
         canvas.width = 256;
         canvas.height = 256;
         const ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = '#EBE6DC';
+        ctx.fillStyle = '#EDE8DE';
         ctx.fillRect(0, 0, 256, 256);
 
-        // Garis-garis halus berlapis untuk memperlihatkan ketebalan lembaran halaman dari sisi
         for (let y = 0; y < 256; y += 2) {
-          ctx.fillStyle = (y % 4 === 0) ? '#D8D1C5' : '#F4F1EA';
+          ctx.fillStyle = (y % 4 === 0) ? '#D8D1C4' : '#F6F3EC';
           ctx.fillRect(0, y, 256, 1);
         }
 
@@ -1676,24 +1877,24 @@ function bookCoverInner(array $buku, int $index): string
         canvas.height = 1024;
         const ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = '#F6F4EE';
+        ctx.fillStyle = '#F8F6F0';
         ctx.fillRect(0, 0, 768, 1024);
 
         // Bayangan lipatan tengah buku (Gutter Shadow)
         const gutterGrad = ctx.createLinearGradient(
-          pageSide === 'left' ? 670 : 0, 0,
-          pageSide === 'left' ? 768 : 98, 0
+          pageSide === 'left' ? 650 : 0, 0,
+          pageSide === 'left' ? 768 : 118, 0
         );
         if (pageSide === 'left') {
-          gutterGrad.addColorStop(0, 'rgba(15, 23, 42, 0)');
-          gutterGrad.addColorStop(1, 'rgba(15, 23, 42, 0.24)');
+          gutterGrad.addColorStop(0, 'rgba(6, 11, 25, 0)');
+          gutterGrad.addColorStop(1, 'rgba(6, 11, 25, 0.28)');
           ctx.fillStyle = gutterGrad;
-          ctx.fillRect(670, 0, 98, 1024);
+          ctx.fillRect(650, 0, 118, 1024);
         } else {
-          gutterGrad.addColorStop(0, 'rgba(15, 23, 42, 0.24)');
-          gutterGrad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+          gutterGrad.addColorStop(0, 'rgba(6, 11, 25, 0.28)');
+          gutterGrad.addColorStop(1, 'rgba(6, 11, 25, 0)');
           ctx.fillStyle = gutterGrad;
-          ctx.fillRect(0, 0, 98, 1024);
+          ctx.fillRect(0, 0, 118, 1024);
         }
 
         // Garis tepi halaman editorial
@@ -1708,7 +1909,7 @@ function bookCoverInner(array $buku, int $index): string
         // Inisial Serif & Baris Teks Editorial
         ctx.fillStyle = '#D4AF37';
         ctx.fillRect(88, 140, 72, 72);
-        ctx.fillStyle = '#070D1E';
+        ctx.fillStyle = '#060B19';
         ctx.font = 'italic 700 48px "Newsreader", Georgia, serif';
         ctx.fillText('B', 108, 192);
 
@@ -1753,7 +1954,7 @@ function bookCoverInner(array $buku, int $index): string
         canvas.height = 540;
         const ctx = canvas.getContext('2d');
 
-        const bgColors = ['#070D1E', '#0F172A', '#172554', '#1E293B'];
+        const bgColors = ['#060B19', '#0B1224', '#111C38', '#162033'];
         ctx.fillStyle = bgColors[idx % bgColors.length];
         ctx.fillRect(0, 0, 384, 540);
 
@@ -1792,38 +1993,52 @@ function bookCoverInner(array $buku, int $index): string
 
       // --- MATERIAL 3D ---
       const heroCoverTex = createHeroCoverTexture();
+      const buckramBumpTex = createBuckramBumpTexture();
+      const endpaperTex = createEndpaperTexture();
       const pageEdgeTex = createPageEdgeStriationTexture();
       const leftPageTex = createArchivalPageTexture('left');
       const rightPageTex = createArchivalPageTexture('right');
 
       const navyBoardMat = trackMat(new THREE.MeshStandardMaterial({
-        color: 0x0F172A,
-        roughness: 0.44,
-        metalness: 0.14
+        color: 0x0B1224,
+        bumpMap: buckramBumpTex,
+        bumpScale: 0.008,
+        roughness: 0.45,
+        metalness: 0.16
+      }));
+
+      const endpaperMat = trackMat(new THREE.MeshStandardMaterial({
+        map: endpaperTex,
+        roughness: 0.55,
+        metalness: 0.08
       }));
 
       const spineLeatherMat = trackMat(new THREE.MeshStandardMaterial({
-        color: 0x070D1E,
-        roughness: 0.38,
-        metalness: 0.18
+        color: 0x060B19,
+        bumpMap: buckramBumpTex,
+        bumpScale: 0.01,
+        roughness: 0.36,
+        metalness: 0.22
       }));
 
       const frontCoverMat = trackMat(new THREE.MeshStandardMaterial({
         map: heroCoverTex,
-        roughness: 0.34,
-        metalness: 0.20
+        bumpMap: buckramBumpTex,
+        bumpScale: 0.006,
+        roughness: 0.32,
+        metalness: 0.24
       }));
 
       const goldFoilMat = trackMat(new THREE.MeshStandardMaterial({
         color: 0xD4AF37,
-        roughness: 0.26,
-        metalness: 0.82
+        roughness: 0.22,
+        metalness: 0.88
       }));
 
       const pageEdgeLayeredMat = trackMat(new THREE.MeshStandardMaterial({
         map: pageEdgeTex,
-        roughness: 0.58,
-        metalness: 0.04
+        roughness: 0.56,
+        metalness: 0.05
       }));
 
       const leftPageSurfaceMat = trackMat(new THREE.MeshStandardMaterial({
@@ -1842,26 +2057,41 @@ function bookCoverInner(array $buku, int $index): string
       const stageRoot = new THREE.Group();
       scene.add(stageRoot);
 
+      // Cincin Koordinat Blueprint Arsitektural di Latar Panggung 3D
+      const blueprintRingGroup = new THREE.Group();
+      blueprintRingGroup.position.set(1.85, 0.1, -1.6);
+      stageRoot.add(blueprintRingGroup);
+
+      const outerRingGeo = trackGeo(new THREE.TorusGeometry(2.75, 0.006, 8, 96));
+      const innerRingGeo = trackGeo(new THREE.TorusGeometry(2.15, 0.005, 8, 80));
+      const ringMatBlue = trackMat(new THREE.MeshBasicMaterial({ color: 0x93C5FD, transparent: true, opacity: 0.18 }));
+      const ringMatGold = trackMat(new THREE.MeshBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0.22 }));
+
+      const outerBlueprintRing = new THREE.Mesh(outerRingGeo, ringMatBlue);
+      const innerBlueprintRing = new THREE.Mesh(innerRingGeo, ringMatGold);
+      innerBlueprintRing.rotation.x = 0.35;
+      blueprintRingGroup.add(outerBlueprintRing, innerBlueprintRing);
+
       const heroTome = new THREE.Group();
       stageRoot.add(heroTome);
 
-      // 1. Punggung Buku Struktural (Spine) dengan Sabuk Tulang (Raised Bands) & Headcaps
+      // 1. Punggung Buku Lengkung (Curved Spine) dengan 5 Raised Bands & Headcaps
       const spineGroup = new THREE.Group();
-      const spineCoreGeo = trackGeo(new THREE.BoxGeometry(0.36, 2.52, 0.18));
-      const spineMesh = new THREE.Mesh(spineCoreGeo, spineLeatherMat);
+      const curvedSpineGeo = trackGeo(new THREE.CylinderGeometry(0.21, 0.21, 2.52, 20, 1, false, Math.PI * 0.5, Math.PI));
+      const spineMesh = new THREE.Mesh(curvedSpineGeo, spineLeatherMat);
+      spineMesh.position.set(0, 0, -0.02);
       spineMesh.castShadow = true;
       spineMesh.receiveShadow = true;
       spineGroup.add(spineMesh);
 
-      const ribGeo = trackGeo(new THREE.BoxGeometry(0.38, 0.038, 0.20));
+      const ribGeo = trackGeo(new THREE.CylinderGeometry(0.222, 0.222, 0.036, 20, 1, false, Math.PI * 0.5, Math.PI));
       for (let r = -0.96; r <= 0.96; r += 0.384) {
         const rib = new THREE.Mesh(ribGeo, goldFoilMat);
-        rib.position.y = r;
+        rib.position.set(0, r, -0.02);
         spineGroup.add(rib);
       }
 
-      // Headband / Tailband struktural di ujung atas & bawah punggung buku
-      const headBandGeo = trackGeo(new THREE.BoxGeometry(0.30, 0.05, 0.16));
+      const headBandGeo = trackGeo(new THREE.BoxGeometry(0.30, 0.048, 0.16));
       const headBandTop = new THREE.Mesh(headBandGeo, goldFoilMat);
       headBandTop.position.set(0, 1.24, 0.02);
       const headBandBottom = new THREE.Mesh(headBandGeo, goldFoilMat);
@@ -1880,8 +2110,8 @@ function bookCoverInner(array $buku, int $index): string
         navyBoardMat,
         navyBoardMat,
         navyBoardMat,
-        navyBoardMat,
-        frontCoverMat // Sisi luar sampul depan menampilkan BIBLIOTHECA — ARCHIVE saat buku menutup
+        endpaperMat,   // Sisi dalam sampul depan (marbled blueprint endpaper)
+        frontCoverMat  // Sisi luar sampul depan (BIBLIOTHECA — ARCHIVE)
       ];
       const leftCoverBoard = new THREE.Mesh(coverBoardGeo, leftCoverMaterials);
       leftCoverBoard.position.set(-0.88, 0, -0.045);
@@ -1903,7 +2133,15 @@ function bookCoverInner(array $buku, int $index): string
       rightSidePivot.position.set(0.16, 0, 0);
       heroTome.add(rightSidePivot);
 
-      const rightCoverBoard = new THREE.Mesh(coverBoardGeo, navyBoardMat);
+      const rightCoverMaterials = [
+        navyBoardMat,
+        goldFoilMat,
+        navyBoardMat,
+        navyBoardMat,
+        endpaperMat,
+        navyBoardMat
+      ];
+      const rightCoverBoard = new THREE.Mesh(coverBoardGeo, rightCoverMaterials);
       rightCoverBoard.position.set(0.88, 0, -0.045);
       rightCoverBoard.castShadow = true;
       rightCoverBoard.receiveShadow = true;
@@ -1929,14 +2167,14 @@ function bookCoverInner(array $buku, int $index): string
       bookmarkRibbon.position.set(0, -1.52, 0.07);
       heroTome.add(bookmarkRibbon);
 
-      // 5. Halaman Melengkung (PlaneGeometry dengan Deformasi Vertex Terkontrol & Analitis)
+      // 5. Halaman Melengkung (PlaneGeometry dengan Deformasi Vertex Terkontrol)
       const dynamicPages = [];
       const pageWidth = 1.60;
       const pageHeight = 2.32;
       const totalSheets = 3;
 
       for (let p = 0; p < totalSheets; p++) {
-        const pGeo = trackGeo(new THREE.PlaneGeometry(pageWidth, pageHeight, 24, 8));
+        const pGeo = trackGeo(new THREE.PlaneGeometry(pageWidth, pageHeight, 26, 8));
         pGeo.translate(pageWidth / 2, 0, 0);
         const pMesh = new THREE.Mesh(pGeo, p % 2 === 0 ? rightPageSurfaceMat : leftPageSurfaceMat);
         pMesh.position.set(0, 0, 0.128 + p * 0.007);
@@ -1952,7 +2190,7 @@ function bookCoverInner(array $buku, int $index): string
         });
       }
 
-      // 6. Buku Arsip Pendamping (7 Buku dengan Variasi Proporsi, Ketebalan & Judul Katalog Aktual)
+      // 6. Buku Arsip Pendamping (7 Buku dengan Variasi Proporsi, Ketebalan & Judul Katalog)
       const constellationGroup = new THREE.Group();
       stageRoot.add(constellationGroup);
 
@@ -1978,8 +2216,8 @@ function bookCoverInner(array $buku, int $index): string
         const cTex = createCompanionCoverTexture(item, i);
         const cCoverMat = trackMat(new THREE.MeshStandardMaterial({
           map: cTex,
-          roughness: 0.44,
-          metalness: 0.14
+          roughness: 0.42,
+          metalness: 0.16
         }));
 
         const cGeo = trackGeo(new THREE.BoxGeometry(spec.w, spec.h, spec.d));
@@ -2008,7 +2246,7 @@ function bookCoverInner(array $buku, int $index): string
         companionBooks.push(cGroup);
       });
 
-      // 7. Partikel Debu Cahaya Biru (#93C5FD) & Emas (#D4AF37) Terukur
+      // 7. Partikel Debu Cahaya Biru (#93C5FD) & Emas (#D4AF37)
       const maxParticles = 96;
       const pGeo = trackGeo(new THREE.BufferGeometry());
       const pPositions = new Float32Array(maxParticles * 3);
@@ -2039,7 +2277,39 @@ function bookCoverInner(array $buku, int $index): string
       const archiveDust = new THREE.Points(pGeo, pMat);
       stageRoot.add(archiveDust);
 
-      // --- PENGATURAN MODE KUALITAS VISUAL & GRACEFUL DEGRADATION ---
+      // --- INTERAKSI MANUAL PEMBALIKAN HALAMAN (KLIK BUKU / TOMBOL HUD) ---
+      let manualTurnBoost = 0;
+      let manualTurnVelocity = 0;
+
+      function triggerManualPageTurn() {
+        if (currentQuality === 'reduced') return;
+        manualTurnVelocity = 0.85;
+      }
+
+      turnPageBtn?.addEventListener('click', triggerManualPageTurn);
+
+      const raycaster = new THREE.Raycaster();
+      const pointerNdc = new THREE.Vector2();
+      const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+      if (!isTouchDevice) {
+        window.addEventListener('click', (e) => {
+          const target = e.target;
+          if (!(target instanceof Element)) return;
+          if (target.closest('a, button, input, select, article, [role="button"], #inspectionDrawer, header')) {
+            return;
+          }
+          pointerNdc.x = (e.clientX / window.innerWidth) * 2 - 1;
+          pointerNdc.y = -(e.clientY / window.innerHeight) * 2 + 1;
+          raycaster.setFromCamera(pointerNdc, camera);
+          const hits = raycaster.intersectObjects(heroTome.children, true);
+          if (hits.length > 0) {
+            triggerManualPageTurn();
+          }
+        });
+      }
+
+      // --- PENGATURAN MODE KUALITAS VISUAL ---
       function applyQualitySettings(mode) {
         currentQuality = mode;
         const width = window.innerWidth;
@@ -2056,7 +2326,6 @@ function bookCoverInner(array $buku, int $index): string
           pGeo.setDrawRange(0, Math.floor(maxParticles * 0.55));
           archiveDust.visible = true;
         } else {
-          // Mode Reduced / Statis
           renderer.setPixelRatio(1.0);
           renderer.shadowMap.enabled = false;
           archiveDust.visible = false;
@@ -2079,7 +2348,7 @@ function bookCoverInner(array $buku, int $index): string
         applyQualitySettings(nextMode);
       });
 
-      // --- PEMETAAN SCROLL BERDASARKAN POSISI SECTION AKTUAL (BEBAS REFLOW PER-FRAME) ---
+      // --- PEMETAAN SCROLL BERDASARKAN POSISI SECTION AKTUAL ---
       let sectionAnchors = {
         hero: 0,
         circulation: 0.25,
@@ -2106,11 +2375,6 @@ function bookCoverInner(array $buku, int $index): string
         };
       }
 
-      //konversi scrollY aktual menjadi progres koreografi ternormalisasi [0..1]
-      // Stage 1 (Hero): 0.00 - 0.25
-      // Stage 2 (Circulation): 0.25 - 0.55
-      // Stage 3 (Statistics): 0.55 - 0.80
-      // Stage 4 (Catalog & Footer): 0.80 - 1.00
       function computeStageProgressFromScroll(scrollY) {
         const { circulation, statistics, catalog, maxScroll } = sectionAnchors;
         if (scrollY <= circulation) {
@@ -2140,7 +2404,6 @@ function bookCoverInner(array $buku, int $index): string
       let pointerCurrentX = 0;
       let pointerCurrentY = 0;
       let lastPointerMoveTime = 0;
-      const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
       function onScrollPassive() {
         const y = window.scrollY;
@@ -2162,14 +2425,12 @@ function bookCoverInner(array $buku, int $index): string
 
       if (!isTouchDevice) {
         window.addEventListener('pointermove', (e) => {
-          // Batasi rentang parallax pointer agar halus & terkontrol
           pointerTargetX = Math.max(-0.65, Math.min(0.65, (e.clientX / window.innerWidth - 0.5) * 1.3));
           pointerTargetY = Math.max(-0.55, Math.min(0.55, (e.clientY / window.innerHeight - 0.5) * 1.1));
           lastPointerMoveTime = performance.now();
         }, { passive: true });
       }
 
-      // ResizeObserver untuk menjaga proporsi tanpa membaca DOM berulang di setiap frame
       const resizeObserver = new ResizeObserver(() => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -2179,7 +2440,7 @@ function bookCoverInner(array $buku, int $index): string
       });
       resizeObserver.observe(document.body);
 
-      // --- INTERPOLASI & UPDATE SCENE (FRAME-RATE INDEPENDENT DAMPING) ---
+      // --- INTERPOLASI & UPDATE SCENE ---
       const clamp01 = (v) => Math.min(1, Math.max(0, v));
       const lerp = (a, b, t) => a + (b - a) * t;
       const damp = (a, b, lambda, dt) => lerp(a, b, 1 - Math.exp(-lambda * dt));
@@ -2198,9 +2459,12 @@ function bookCoverInner(array $buku, int $index): string
 
         if (!isReduced) {
           elapsedTime += effectiveDt;
+          if (manualTurnVelocity > 0.001) {
+            manualTurnBoost += manualTurnVelocity * effectiveDt;
+            manualTurnVelocity = damp(manualTurnVelocity, 0, 2.2, effectiveDt);
+          }
         }
 
-        // Jika pointer berhenti bergerak lebih dari 1.8 detik, kembalikan ke pose dasar secara halus
         if (!isTouchDevice && (now - lastPointerMoveTime > 1800)) {
           pointerTargetX = damp(pointerTargetX, 0, 2.5, effectiveDt);
           pointerTargetY = damp(pointerTargetY, 0, 2.5, effectiveDt);
@@ -2220,12 +2484,10 @@ function bookCoverInner(array $buku, int $index): string
         const isDesktop = window.innerWidth >= 1024;
         const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
 
-        // Bobot transisi halus antar 4 Tahap Scroll
         const wStage2 = smoothstep(0.18, 0.34, s) * (1 - smoothstep(0.48, 0.60, s));
         const wStage3 = smoothstep(0.48, 0.62, s) * (1 - smoothstep(0.75, 0.85, s));
         const wStage4 = smoothstep(0.75, 0.94, s);
 
-        // Update label indikator tahap hanya ketika tahap berubah
         let nextStageCode = 'STAGE 01 // HERO TOME';
         if (s >= 0.25 && s < 0.55) {
           nextStageCode = 'STAGE 02 // CIRCULATION ISO';
@@ -2239,11 +2501,9 @@ function bookCoverInner(array $buku, int $index): string
           lastStageCode = nextStageCode;
         }
 
-        // Penyesuaian skala responsif untuk layar kecil
         const targetScale = isDesktop ? 1.0 : (isTablet ? 0.84 : 0.68);
         stageRoot.scale.setScalar(damp(stageRoot.scale.x, targetScale, 6.0, effectiveDt));
 
-        // Posisi Buku Utama berdasarkan Tahap Scroll
         let targetTomeX = isDesktop ? 1.95 : 0;
         if (s >= 0.25 && s < 0.55) {
           targetTomeX = isDesktop ? 1.65 : 0;
@@ -2259,8 +2519,14 @@ function bookCoverInner(array $buku, int $index): string
         heroTome.position.x = damp(heroTome.position.x, targetTomeX, 5.5, effectiveDt);
         heroTome.position.y = damp(heroTome.position.y, targetTomeY, 5.5, effectiveDt);
 
-        // Sudut Buka/Tutup Sampul Buku Utama:
-        // Stage 1: Terbuka tiga perempat | Stage 2: Terbuka lebih lebar | Stage 4: Menutup sampul depan
+        // Sinkronisasi posisi cincin blueprint dengan buku utama
+        blueprintRingGroup.position.x = heroTome.position.x;
+        blueprintRingGroup.position.y = heroTome.position.y;
+        if (!isReduced) {
+          outerBlueprintRing.rotation.z = elapsedTime * 0.08 + s * 1.2;
+          innerBlueprintRing.rotation.z = -elapsedTime * 0.12 - s * 1.6;
+        }
+
         const openAngle = lerp(0.22, 0.05, wStage2);
         const targetLeftPivotY = lerp(openAngle, Math.PI - 0.035, wStage4);
         const targetRightPivotY = lerp(-openAngle, 0.02, wStage4);
@@ -2268,7 +2534,6 @@ function bookCoverInner(array $buku, int $index): string
         leftSidePivot.rotation.y = damp(leftSidePivot.rotation.y, targetLeftPivotY, 6.5, effectiveDt);
         rightSidePivot.rotation.y = damp(rightSidePivot.rotation.y, targetRightPivotY, 6.5, effectiveDt);
 
-        // Rotasi Tiga Perempat -> Top-Down Isometric -> Ring -> Pose Akhir Tertutup Elegan
         const targetRotX = -0.32 + wStage2 * 0.68 - wStage4 * 0.22 + pointerCurrentY * 0.14;
         const targetRotY = -0.36 + wStage2 * 0.42 + wStage3 * 0.30 - wStage4 * 1.12 + pointerCurrentX * 0.20;
         const targetRotZ = 0.06 - wStage2 * 0.18 + wStage4 * 0.04;
@@ -2277,10 +2542,9 @@ function bookCoverInner(array $buku, int $index): string
         heroTome.rotation.y = damp(heroTome.rotation.y, targetRotY, 5.8, effectiveDt);
         heroTome.rotation.z = damp(heroTome.rotation.z, targetRotZ, 5.8, effectiveDt);
 
-        // Gerakan Halus Bookmark Ribbon
         bookmarkRibbon.rotation.z = isReduced ? 0 : Math.sin(elapsedTime * 1.6) * 0.05;
 
-        // Deformasi Vertex Halaman Melengkung (Stabil, Terbatas & Bebas Flip)
+        // Deformasi Vertex Halaman Melengkung
         const pageVisScale = 1 - smoothstep(0.74, 0.88, s);
         dynamicPages.forEach((pg) => {
           const isPageVisible = pageVisScale > 0.02;
@@ -2289,19 +2553,16 @@ function bookCoverInner(array $buku, int $index): string
 
           pg.mesh.scale.setScalar(pageVisScale);
 
-          // Siklus halaman yang stabil dan terkontrol
           const baseCycle = isReduced
             ? (s * 1.8 + pg.phaseOffset) % 1
-            : (elapsedTime * (0.14 + wStage2 * 0.12) + s * 2.4 + pg.phaseOffset) % 1;
+            : (elapsedTime * (0.14 + wStage2 * 0.12) + s * 2.4 + manualTurnBoost + pg.phaseOffset) % 1;
 
-          // Batasi sudut dari 0.08*PI hingga 0.92*PI agar permukaan tidak pernah terbalik
           const safeCycle = 0.08 + baseCycle * 0.84;
           const turnAngle = safeCycle * Math.PI;
           const sinTurn = Math.sin(turnAngle);
           const cosTurn = Math.cos(turnAngle);
 
-          // Amplitudo lengkungan halaman terkontrol
-          const archAmplitude = (0.19 + Math.min(0.10, scrollSpeed * 0.08)) * Math.sin(safeCycle * Math.PI);
+          const archAmplitude = (0.20 + Math.min(0.11, (scrollSpeed + manualTurnVelocity) * 0.08)) * Math.sin(safeCycle * Math.PI);
 
           const posAttr = pg.geo.attributes.position;
           const normAttr = pg.geo.attributes.normal;
@@ -2311,7 +2572,7 @@ function bookCoverInner(array $buku, int $index): string
           for (let i = 0; i < posAttr.count; i++) {
             const bx = baseXArr[i];
             const by = baseYArr[i];
-            const normX = bx / pageWidth; // [0..1]
+            const normX = bx / pageWidth;
 
             const arch = Math.sin(normX * Math.PI) * archAmplitude;
             const rx = cosTurn * bx - sinTurn * arch;
@@ -2319,7 +2580,6 @@ function bookCoverInner(array $buku, int $index): string
 
             posAttr.setXYZ(i, rx, by, rz);
 
-            // Turunan analitis untuk normal permukaan yang mulus tanpa biaya computeVertexNormals penuh
             const dArchDx = (Math.PI / pageWidth) * Math.cos(normX * Math.PI) * archAmplitude;
             const tx = cosTurn - sinTurn * dArchDx;
             const tz = sinTurn + cosTurn * dArchDx;
@@ -2330,7 +2590,7 @@ function bookCoverInner(array $buku, int $index): string
           normAttr.needsUpdate = true;
         });
 
-        // Koreografi 7 Buku Pendamping (Spiral -> Komposisi Sirkulasi -> Cincin Indeks)
+        // Koreografi 7 Buku Pendamping
         const totalComp = companionBooks.length;
         companionBooks.forEach((b) => {
           const ud = b.userData;
@@ -2341,12 +2601,10 @@ function bookCoverInner(array $buku, int $index): string
           const spiralY = ud.spiralY + (isReduced ? 0 : Math.sin(elapsedTime * 1.1 + i) * 0.14);
           const spiralZ = Math.sin(orbitAngle) * ud.baseRadius;
 
-          // Stage 2: Komposisi Arsitektural Sirkulasi di sisi kiri/belakang
           const circX = (i - (totalComp - 1) / 2) * 0.98 - (isDesktop ? 0.8 : 0);
           const circY = ((i % 2 === 0) ? 0.55 : -0.55) + (isReduced ? 0 : Math.sin(elapsedTime + i) * 0.12);
           const circZ = -1.35 + (i % 3) * 0.35;
 
-          // Stage 3: Susunan Cincin Indeks Presisi mengelilingi panggung tanpa menutupi teks utama
           const ringAngle = (i / totalComp) * Math.PI * 2 + (isReduced ? 0 : elapsedTime * 0.18);
           const ringRadius = isDesktop ? 3.85 : 3.1;
           const ringX = Math.cos(ringAngle) * ringRadius;
@@ -2369,14 +2627,12 @@ function bookCoverInner(array $buku, int $index): string
           b.rotation.x = lerp(0.22, 0.04, wStage3);
         });
 
-        // Pencahayaan Cobalt menonjolkan siluet objek di Stage 3
-        cobaltRimLight.intensity = lerp(5.5, 10.5, wStage3);
+        cobaltRimLight.intensity = lerp(5.8, 10.8, wStage3);
 
         if (!isReduced) {
           archiveDust.rotation.y = elapsedTime * 0.025 + s * 0.45;
         }
 
-        // Koreografi Kamera 4-Tahap
         const targetCamX = pointerCurrentX * 0.38 - wStage2 * 0.45;
         const targetCamY = lerp(1.15, 3.05, wStage2) - wStage4 * 0.30 - pointerCurrentY * 0.28;
         const targetCamZ = lerp(8.8, 6.5, wStage2) + wStage3 * 0.55 + wStage4 * 1.15;
@@ -2393,7 +2649,6 @@ function bookCoverInner(array $buku, int $index): string
         renderer.render(scene, camera);
       }
 
-      // --- PENJADWALAN ANIMASI TUNGGAL (HENTIKAN SAAT TAB TIDAK AKTIF ATAU STAGE TIDAK TERLIHAT) ---
       let rafId = null;
       let isTabVisible = !document.hidden;
       let isStageVisible = true;
@@ -2437,10 +2692,8 @@ function bookCoverInner(array $buku, int $index): string
         stageObserver.observe(container);
       }
 
-      // Mulai animation loop utama tunggal
       updateLoopState();
 
-      // Pembersihan resource WebGL & listener saat halaman ditutup
       window.addEventListener('pagehide', () => {
         if (rafId !== null) {
           cancelAnimationFrame(rafId);
@@ -2450,6 +2703,7 @@ function bookCoverInner(array $buku, int $index): string
         createdGeometries.forEach(g => g.dispose());
         createdMaterials.forEach(m => m.dispose());
         createdTextures.forEach(t => t.dispose());
+        envRenderTarget.dispose();
         renderer.dispose();
       });
     }
