@@ -17,6 +17,8 @@ $old_username = '';
 $success_msg = $_SESSION['success'] ?? '';
 unset($_SESSION['success']);
 
+$is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
 if (isset($_POST['login'])) {
     $username = mysqli_real_escape_string($koneksi, trim($_POST['username'] ?? ''));
     $password = $_POST['password'] ?? '';
@@ -24,6 +26,11 @@ if (isset($_POST['login'])) {
 
     if ($username === '' || $password === '') {
         $message = "Username dan kata sandi wajib diisi.";
+        if ($is_ajax) {
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(['ok' => false, 'message' => $message]);
+            exit;
+        }
     } else {
         $query = mysqli_query($koneksi, "SELECT * FROM user WHERE Username='$username' LIMIT 1");
         $data = $query ? mysqli_fetch_assoc($query) : null;
@@ -35,14 +42,28 @@ if (isset($_POST['login'])) {
             $_SESSION['NamaLengkap'] = $data['NamaLengkap'];
             $_SESSION['Role']        = $data['Role'];
 
-            if ($data['Role'] === 'admin') {
-                header("Location: admin_peminjaman.php");
-            } else {
-                header("Location: index.php");
+            $targetUrl = ($data['Role'] === 'admin') ? 'admin_peminjaman.php' : 'index.php';
+
+            if ($is_ajax) {
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode([
+                    'ok'       => true,
+                    'redirect' => $targetUrl,
+                    'nama'     => $data['NamaLengkap'],
+                    'role'     => $data['Role']
+                ]);
+                exit;
             }
+
+            header("Location: " . $targetUrl);
             exit;
         } else {
             $message = "Kredensial tidak cocok. Silakan periksa kembali username atau kata sandi Anda.";
+            if ($is_ajax) {
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['ok' => false, 'message' => $message]);
+                exit;
+            }
         }
     }
 }
@@ -92,6 +113,7 @@ if (isset($_POST['login'])) {
         body {
             background-color: #ffffff;
             color: #0f172a;
+            overflow-x: hidden;
         }
 
         .border-hairline {
@@ -129,19 +151,84 @@ if (isset($_POST['login'])) {
 
         @keyframes subtleShake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-4px); }
-            40%, 80% { transform: translateX(4px); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
         .shake-error {
-            animation: subtleShake 0.4s ease-in-out;
+            animation: subtleShake 0.42s ease-in-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* ==================== SPLIT CURTAIN TRANSITION SYSTEM ==================== */
+        #archival-curtain {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            overflow: hidden;
         }
-        .page-enter {
-            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        #archival-curtain.is-interactive {
+            pointer-events: all;
+        }
+        .curtain-panel {
+            width: 50%;
+            height: 100%;
+            background-color: #070d1e;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(29, 78, 216, 0.16) 0%, transparent 70%),
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 36px 36px, 36px 36px;
+            transition: transform 0.72s cubic-bezier(0.76, 0, 0.24, 1);
+            will-change: transform;
+            position: relative;
+        }
+        .curtain-left {
+            border-right: 1px solid rgba(212, 175, 55, 0.45);
+            transform: translateX(0%);
+        }
+        .curtain-right {
+            border-left: 1px solid rgba(212, 175, 55, 0.45);
+            transform: translateX(0%);
+        }
+        /* Saat state terbuka: tirai terpisah dari tengah ke kiri (-100%) dan kanan (+100%) */
+        #archival-curtain.is-open .curtain-left {
+            transform: translateX(-100%);
+        }
+        #archival-curtain.is-open .curtain-right {
+            transform: translateX(100%);
+        }
+
+        /* Garis Segel Tengah & Badge Transisi */
+        #curtain-center-badge {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 105;
+            pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #archival-curtain.is-open ~ #curtain-center-badge {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.88);
+        }
+
+        /* Animasi Konten Halaman Saat Tirai Terbuka */
+        .curtain-content-sync {
+            transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+        }
+        body.curtain-closed .curtain-content-sync {
+            transform: scale(0.97);
+            opacity: 0.35;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .curtain-panel,
+            #curtain-center-badge,
+            .curtain-content-sync {
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 
@@ -153,13 +240,43 @@ if (isset($_POST['login'])) {
     }
     </script>
 </head>
-<body class="min-h-screen flex flex-col lg:flex-row selection:bg-cobalt-600 selection:text-white">
+<body class="min-h-screen flex flex-col lg:flex-row selection:bg-cobalt-600 selection:text-white curtain-closed">
+
+    <!-- ==================== TIRAI PEMISAH DARI TENGAH (SPLIT CURTAIN OVERLAY) ==================== -->
+    <div id="archival-curtain" class="is-interactive" aria-hidden="true">
+        <div class="curtain-panel curtain-left flex items-center justify-end pr-6 sm:pr-10">
+            <span class="font-mono text-[10px] tracking-[0.25em] text-slate-400 uppercase hidden sm:inline">BIBLIOTHECA</span>
+        </div>
+        <div class="curtain-panel curtain-right flex items-center justify-start pl-6 sm:pl-10">
+            <span class="font-mono text-[10px] tracking-[0.25em] text-amber-400/90 uppercase hidden sm:inline">ARCHIVE GATE</span>
+        </div>
+    </div>
+
+    <!-- Lencana Tengah Tirai (Menampilkan Status Perpindahan Halaman & Sambutan Login Dashboard) -->
+    <div id="curtain-center-badge" aria-live="polite">
+        <div class="px-6 py-4 rounded-xl bg-slate-950/95 border border-amber-400/40 shadow-2xl text-center min-w-[270px] sm:min-w-[320px] backdrop-blur-md">
+            <div id="curtain-badge-code" class="font-mono text-[10px] uppercase tracking-[0.22em] text-blue-400 mb-1">
+                ID // 01-AUTH &bull; PORTAL MASUK
+            </div>
+            <div id="curtain-badge-title" class="font-serif italic text-xl text-white tracking-tight">
+                Membuka Ruang Otentikasi...
+            </div>
+            <div id="curtain-progress-wrap" class="hidden mt-3 pt-2.5 border-t border-white/10">
+                <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div id="curtain-progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-amber-400 w-0 transition-all duration-700 ease-out"></div>
+                </div>
+                <div id="curtain-badge-sub" class="font-mono text-[10px] text-slate-300 uppercase tracking-widest mt-2">
+                    MENYIAPKAN DASHBOARD...
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- KOLOM KIRI: FORMULIR OTENTIKASI -->
-    <main class="w-full lg:w-[48%] xl:w-[44%] min-h-screen flex flex-col justify-between p-8 sm:p-12 md:p-16 border-r border-hairline bg-white z-10 page-enter">
+    <main class="w-full lg:w-[48%] xl:w-[44%] min-h-screen flex flex-col justify-between p-8 sm:p-12 md:p-16 border-r border-hairline bg-white z-10 curtain-content-sync">
         
         <div class="flex items-center justify-between border-b border-hairline pb-4">
-            <a href="landing.php" class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-cobalt-600 transition-colors group">
+            <a href="landing.php" data-curtain-link="landing" class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-cobalt-600 transition-colors group">
                 <i class="fa-solid fa-arrow-left text-[11px] group-hover:-translate-x-1 transition-transform"></i>
                 <span>Kembali ke Beranda</span>
             </a>
@@ -170,8 +287,7 @@ if (isset($_POST['login'])) {
 
         <div class="max-w-md w-full mx-auto my-10">
             <div class="mb-8">
-
-            <h1 class="font-serif text-3xl sm:text-4xl text-slate-900 font-normal tracking-tight leading-tight">
+                <h1 class="font-serif text-3xl sm:text-4xl text-slate-900 font-normal tracking-tight leading-tight">
                     Masuk ke ruang <br><em class="italic text-cobalt-600 font-normal">baca digital.</em>
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-500 mt-2.5 leading-relaxed">
@@ -179,7 +295,7 @@ if (isset($_POST['login'])) {
                 </p>
             </div>
 
-            <!-- Pesan Sukses -->
+            <!-- Pesan Sukses (Dari Register) -->
             <?php if (!empty($success_msg)): ?>
                 <div class="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-lg flex items-start gap-3">
                     <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
@@ -187,15 +303,14 @@ if (isset($_POST['login'])) {
                 </div>
             <?php endif; ?>
 
-            <!-- Pesan Kesalahan -->
-            <?php if (!empty($message)): ?>
-                <div class="shake-error mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-start gap-3">
-                    <i class="fa-solid fa-circle-exclamation text-rose-600 mt-0.5 text-sm"></i>
-                    <div class="leading-relaxed font-medium"><?= htmlspecialchars($message); ?></div>
-                </div>
-            <?php endif; ?>
+            <!-- Pesan Kesalahan Server-Side / Dinamis -->
+            <div id="errorAlertBox" class="<?= !empty($message) ? 'shake-error' : 'hidden'; ?> mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-start gap-3" role="alert">
+                <i class="fa-solid fa-circle-exclamation text-rose-600 mt-0.5 text-sm"></i>
+                <div id="errorAlertText" class="leading-relaxed font-medium"><?= htmlspecialchars($message); ?></div>
+            </div>
 
-            <form method="POST" action="" class="space-y-4">
+            <form id="loginForm" method="POST" action="" class="space-y-4">
+                <input type="hidden" name="login" value="1">
                 <div>
                     <label for="username" class="block text-[11px] font-mono uppercase tracking-wider font-bold text-slate-700 mb-1.5">
                         Username Anggota <span class="text-cobalt-600">*</span>
@@ -235,18 +350,19 @@ if (isset($_POST['login'])) {
                 <div class="pt-2">
                     <button 
                         type="submit" 
-                        name="login" 
+                        id="submitLoginBtn"
                         class="w-full bg-slate-900 hover:bg-cobalt-600 active:scale-[0.99] text-white font-medium py-3.5 px-6 rounded-lg text-xs uppercase font-mono tracking-wider transition-all duration-200 flex items-center justify-between shadow-sm group">
-                        <span>Verifikasi & Masuk</span>
-                        <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+                        <span id="submitBtnText">Verifikasi &amp; Masuk</span>
+                        <i id="submitBtnIcon" class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </div>
             </form>
 
             <div class="mt-8 pt-5 border-t border-hairline flex items-center justify-between text-xs text-slate-600">
                 <span>Belum terdaftar sebagai anggota?</span>
-                <a href="register.php" class="font-mono font-bold text-cobalt-600 hover:text-cobalt-700 uppercase tracking-wider hover:underline">
-                    Daftar Baru &rarr;
+                <a href="register.php" data-curtain-link="register" class="font-mono font-bold text-cobalt-600 hover:text-cobalt-700 uppercase tracking-wider hover:underline inline-flex items-center gap-1.5 group">
+                    <span>Daftar Baru</span>
+                    <span class="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
                 </a>
             </div>
         </div>
@@ -258,9 +374,12 @@ if (isset($_POST['login'])) {
     </main>
 
     <!-- KOLOM KANAN: 3D ARSIP INTERAKTIF -->
-    <aside class="hidden lg:flex lg:flex-1 relative blueprint-canvas-bg text-white flex-col justify-between p-12 overflow-hidden select-none">
+    <aside class="hidden lg:flex lg:flex-1 relative blueprint-canvas-bg text-white flex-col justify-between p-12 overflow-hidden select-none curtain-content-sync">
         
-        <div class="relative z-10 flex items-center justify-between border-b border-white/10 pb-4 text-xs font-mono text-slate-400"></div>
+        <div class="relative z-10 flex items-center justify-between border-b border-white/10 pb-4 text-xs font-mono text-slate-400">
+            <span>STAGE // AUTHENTICATION CODEX</span>
+            <span id="stageStatusLabel" class="text-blue-400">STANDBY</span>
+        </div>
 
         <!-- Kanvas 3D -->
         <div id="canvas-3d-container" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
@@ -293,17 +412,170 @@ if (isset($_POST['login'])) {
         }
     </script>
 
-    <!-- Script Three.js 3D Library Book Stage -->
+    <!-- Script Three.js 3D Library Book Stage + Koreografi Tirai & Login Dashboard -->
     <script type="module">
         import * as THREE from 'three';
 
+        // State animasi global untuk disinkronkan dengan transisi tirai & login
+        const sceneState = {
+            mode: 'entry', // 'entry' | 'idle' | 'curtainExit' | 'dashboardLaunch'
+            focusOffset: 0,
+            launchProgress: 0
+        };
+
+        // ==================== 1. PENGENDALI TIRAI (SPLIT CURTAIN) & FORM LOGIN ====================
+        const curtain = document.getElementById('archival-curtain');
+        const badgeCode = document.getElementById('curtain-badge-code');
+        const badgeTitle = document.getElementById('curtain-badge-title');
+        const badgeSub = document.getElementById('curtain-badge-sub');
+        const progressWrap = document.getElementById('curtain-progress-wrap');
+        const progressBar = document.getElementById('curtain-progress-bar');
+        const stageStatusLabel = document.getElementById('stageStatusLabel');
+
+        // Saat halaman dimuat: Buka tirai terpisah dari tengah ke kiri dan kanan
+        window.addEventListener('DOMContentLoaded', () => {
+            const fromPage = sessionStorage.getItem('biblio_transition_from');
+            sessionStorage.removeItem('biblio_transition_from');
+
+            if (fromPage === 'register') {
+                badgeCode.textContent = 'ID // 02-REG ➔ ID // 01-AUTH';
+                badgeTitle.textContent = 'Membuka Ruang Otentikasi...';
+            }
+
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    curtain.classList.add('is-open');
+                    curtain.classList.remove('is-interactive');
+                    document.body.classList.remove('curtain-closed');
+                    sceneState.mode = 'idle';
+                }, 120);
+            });
+        });
+
+        // Fungsi menutup tirai ke tengah lalu berpindah halaman (Login <-> Register / Beranda)
+        function triggerCurtainNavigation(targetHref, linkType) {
+            sceneState.mode = 'curtainExit';
+            sessionStorage.setItem('biblio_transition_from', 'login');
+
+            if (linkType === 'register') {
+                badgeCode.textContent = 'ID // 01-AUTH ➔ ID // 02-REG';
+                badgeTitle.textContent = 'Menuju Pendaftaran Anggota...';
+            } else {
+                badgeCode.textContent = 'ID // 01-AUTH ➔ BERANDA';
+                badgeTitle.textContent = 'Kembali ke Beranda Arsip...';
+            }
+            progressWrap.classList.add('hidden');
+
+            curtain.classList.add('is-interactive');
+            curtain.classList.remove('is-open');
+            document.body.classList.add('curtain-closed');
+
+            setTimeout(() => {
+                window.location.href = targetHref;
+            }, 680);
+        }
+
+        document.querySelectorAll('[data-curtain-link]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                const href = link.getAttribute('href');
+                const type = link.getAttribute('data-curtain-link');
+                triggerCurtainNavigation(href, type);
+            });
+        });
+
+        // Intersepsi Submit Login untuk Animasi Keberhasilan Menuju Dashboard
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitLoginBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitBtnIcon = document.getElementById('submitBtnIcon');
+        const errorBox = document.getElementById('errorAlertBox');
+        const errorText = document.getElementById('errorAlertText');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                errorBox.classList.add('hidden');
+                errorBox.classList.remove('shake-error');
+                submitBtn.disabled = true;
+                submitBtnText.textContent = 'Memverifikasi Kredensial...';
+                submitBtnIcon.className = 'fa-solid fa-circle-notch fa-spin text-[11px]';
+                if (stageStatusLabel) stageStatusLabel.textContent = 'VERIFYING...';
+
+                try {
+                    const formData = new FormData(loginForm);
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result && result.ok) {
+                        // FASE 1: Akselerasi Buku 3D & Partikel Cahaya di Panggung Kanan
+                        sceneState.mode = 'dashboardLaunch';
+                        if (stageStatusLabel) stageStatusLabel.textContent = 'ACCESS GRANTED';
+                        submitBtn.className = 'w-full bg-emerald-600 text-white font-medium py-3.5 px-6 rounded-lg text-xs uppercase font-mono tracking-wider transition-all duration-200 flex items-center justify-between shadow-sm';
+                        submitBtnText.textContent = 'Otentikasi Berhasil';
+                        submitBtnIcon.className = 'fa-solid fa-check text-[11px]';
+
+                        // FASE 2: Tutup Tirai Tengah Menampilkan Identitas Anggota / Admin
+                        setTimeout(() => {
+                            const roleLabel = result.role === 'admin' ? 'ADMINISTRATOR SIRKULASI' : 'ANGGOTA PERPUSTAKAAN';
+                            badgeCode.textContent = `SESI AKTIF // ${roleLabel}`;
+                            badgeTitle.textContent = `Selamat Datang, ${result.nama || 'Anggota'}`;
+                            badgeSub.textContent = 'MEMBUKA RUANG BACA DIGITAL...';
+                            progressWrap.classList.remove('hidden');
+
+                            curtain.classList.add('is-interactive');
+                            curtain.classList.remove('is-open');
+                            document.body.classList.add('curtain-closed');
+
+                            requestAnimationFrame(() => {
+                                progressBar.style.width = '100%';
+                            });
+                        }, 480);
+
+                        // FASE 3: Buka Tirai Terpisah dari Tengah & Masuk ke Dashboard
+                        setTimeout(() => {
+                            curtain.classList.add('is-open');
+                        }, 1350);
+
+                        setTimeout(() => {
+                            window.location.href = result.redirect || 'index.php';
+                        }, 1680);
+
+                    } else {
+                        // Jika gagal: tampilkan pesan kesalahan dengan animasi getar halus
+                        const msg = (result && result.message) ? result.message : 'Kredensial tidak cocok.';
+                        errorText.textContent = msg;
+                        errorBox.classList.remove('hidden');
+                        void errorBox.offsetWidth; // trigger reflow untuk mengulang animasi shake
+                        errorBox.classList.add('shake-error');
+
+                        submitBtn.disabled = false;
+                        submitBtnText.textContent = 'Verifikasi & Masuk';
+                        submitBtnIcon.className = 'fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform';
+                        if (stageStatusLabel) stageStatusLabel.textContent = 'AUTH FAILED';
+                    }
+                } catch (err) {
+                    // Fallback aman: jalankan submit form standar jika jaringan/JSON bermasalah
+                    loginForm.submit();
+                }
+            });
+        }
+
+        // ==================== 2. PANGGUNG 3D THREE.JS ====================
         const container = document.getElementById('canvas-3d-container');
         if (container) {
             const scene = new THREE.Scene();
             scene.fog = new THREE.FogExp2(0x070d1e, 0.08);
 
             const camera = new THREE.PerspectiveCamera(36, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 0.8, 7.8);
+            camera.position.set(0, 0.8, 9.2); // Mulai sedikit lebih jauh untuk efek dolly-in saat tirai terbuka
 
             const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
@@ -315,7 +587,6 @@ if (isset($_POST['login'])) {
             const mainGroup = new THREE.Group();
             scene.add(mainGroup);
 
-            // Membuat Tekstur Sampul dengan Foil Emas secara Prosedural
             function createBookCoverTexture(title, baseHex) {
                 const canvas = document.createElement('canvas');
                 canvas.width = 512;
@@ -325,14 +596,12 @@ if (isset($_POST['login'])) {
                 ctx.fillStyle = baseHex;
                 ctx.fillRect(0, 0, 512, 700);
 
-                // Pola bingkai garis halus
                 ctx.strokeStyle = '#d4af37';
                 ctx.lineWidth = 4;
                 ctx.strokeRect(30, 30, 452, 640);
                 ctx.lineWidth = 1;
                 ctx.strokeRect(40, 40, 432, 620);
 
-                // Tipografi Emas
                 ctx.fillStyle = '#fef08a';
                 ctx.font = 'italic 34px "Newsreader", serif';
                 ctx.textAlign = 'center';
@@ -345,18 +614,15 @@ if (isset($_POST['login'])) {
                 return new THREE.CanvasTexture(canvas);
             }
 
-            // Fungsi Membuat Model Buku 3D Realistis
             function createBookModel(title, coverColorHex, baseHexStr, bookmarkColor) {
                 const book = new THREE.Group();
 
-                // Kertas Buku
                 const pagesMat = new THREE.MeshStandardMaterial({ color: 0xfaf8f5, roughness: 0.9 });
                 const pages = new THREE.Mesh(new THREE.BoxGeometry(2.35, 3.25, 0.42), pagesMat);
                 pages.castShadow = true;
                 pages.receiveShadow = true;
                 book.add(pages);
 
-                // Sampul
                 const coverTex = createBookCoverTexture(title, baseHexStr);
                 const coverMat = new THREE.MeshStandardMaterial({ 
                     map: coverTex, 
@@ -379,7 +645,6 @@ if (isset($_POST['login'])) {
                 spine.castShadow = true;
                 book.add(spine);
 
-                // Pita Pembatas Buku (Bookmark Ribbon)
                 const ribbonGeo = new THREE.BoxGeometry(0.12, 1.2, 0.01);
                 const ribbonMat = new THREE.MeshStandardMaterial({ color: bookmarkColor, roughness: 0.4 });
                 const ribbon = new THREE.Mesh(ribbonGeo, ribbonMat);
@@ -400,7 +665,6 @@ if (isset($_POST['login'])) {
             bookSecondary.rotation.set(-0.15, 0.3, -0.08);
             mainGroup.add(bookSecondary);
 
-            // Partikel Debu Cahaya (Atmospheric Library Dust Motes)
             const particleCount = 140;
             const particleGeo = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
@@ -421,7 +685,6 @@ if (isset($_POST['login'])) {
             const particles = new THREE.Points(particleGeo, particleMat);
             scene.add(particles);
 
-            // Pencahayaan
             const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
             scene.add(ambientLight);
 
@@ -434,7 +697,6 @@ if (isset($_POST['login'])) {
             softFillLight.position.set(-6, -4, 4);
             scene.add(softFillLight);
 
-            // Interaksi Mouse Halus
             let mouseTargetX = 0;
             let mouseTargetY = 0;
             let currentRotX = 0;
@@ -446,11 +708,9 @@ if (isset($_POST['login'])) {
                 mouseTargetY = ((e.clientY - rect.top) / rect.height - 0.5) * 0.5;
             });
 
-            // Reaksi saat input formulir difokuskan
-            let focusOffset = 0;
             document.querySelectorAll('.interactive-input').forEach(input => {
-                input.addEventListener('focus', () => { focusOffset = 0.15; });
-                input.addEventListener('blur', () => { focusOffset = 0; });
+                input.addEventListener('focus', () => { sceneState.focusOffset = 0.15; });
+                input.addEventListener('blur', () => { sceneState.focusOffset = 0; });
             });
 
             const clock = new THREE.Clock();
@@ -458,21 +718,43 @@ if (isset($_POST['login'])) {
                 requestAnimationFrame(animate);
                 const elapsed = clock.getElapsedTime();
 
-                // Damping rotasi kamera/grup
-                currentRotY += (mouseTargetX - currentRotY) * 0.05;
-                currentRotX += (mouseTargetY - currentRotX) * 0.05;
+                if (sceneState.mode === 'dashboardLaunch') {
+                    // Koreografi saat Login Sukses: Buku Utama menghadap penuh & kamera menyelam masuk
+                    sceneState.launchProgress = Math.min(1, sceneState.launchProgress + 0.035);
+                    const lp = sceneState.launchProgress;
 
-                mainGroup.rotation.y = currentRotY;
-                mainGroup.rotation.x = currentRotX;
+                    bookPrimary.position.x += (0 - bookPrimary.position.x) * 0.08;
+                    bookPrimary.position.y += (0.15 - bookPrimary.position.y) * 0.08;
+                    bookPrimary.position.z += (1.35 - bookPrimary.position.z) * 0.08;
+                    bookPrimary.rotation.y += (0.05 - bookPrimary.rotation.y) * 0.09;
+                    bookPrimary.rotation.x += (0 - bookPrimary.rotation.x) * 0.09;
 
-                // Animasi Buku Mengambang
-                bookPrimary.position.y = 0.1 + Math.sin(elapsed * 1.2) * 0.06 + focusOffset;
-                bookSecondary.position.y = -0.6 + Math.cos(elapsed * 0.9) * 0.05 - (focusOffset * 0.5);
+                    bookSecondary.position.z -= 0.06;
+                    camera.position.z += (5.2 - camera.position.z) * 0.06;
+                    softFillLight.intensity = 1.2 + lp * 3.5;
+                } else if (sceneState.mode === 'curtainExit') {
+                    // Saat berpindah ke Register: Kamera mundur halus seiring tirai menutup
+                    camera.position.z += (9.0 - camera.position.z) * 0.08;
+                    mainGroup.rotation.y += 0.03;
+                } else {
+                    // Mode Idle Normal + Dolly-in dari pembukaan tirai
+                    camera.position.z += (7.8 - camera.position.z) * 0.06;
 
-                // Pergerakan partikel debu halus
+                    currentRotY += (mouseTargetX - currentRotY) * 0.05;
+                    currentRotX += (mouseTargetY - currentRotX) * 0.05;
+
+                    mainGroup.rotation.y = currentRotY;
+                    mainGroup.rotation.x = currentRotX;
+
+                    bookPrimary.position.y = 0.1 + Math.sin(elapsed * 1.2) * 0.06 + sceneState.focusOffset;
+                    bookSecondary.position.y = -0.6 + Math.cos(elapsed * 0.9) * 0.05 - (sceneState.focusOffset * 0.5);
+                }
+
+                // Pergerakan partikel debu (lebih cepat saat meluncur ke dashboard)
                 const pos = particleGeo.attributes.position.array;
+                const speedY = sceneState.mode === 'dashboardLaunch' ? 0.035 : 0.002;
                 for (let i = 1; i < particleCount * 3; i += 3) {
-                    pos[i] += 0.002;
+                    pos[i] += speedY;
                     if (pos[i] > 4) pos[i] = -4;
                 }
                 particleGeo.attributes.position.needsUpdate = true;
