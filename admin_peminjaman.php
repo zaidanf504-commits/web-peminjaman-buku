@@ -607,7 +607,7 @@ if (isset($_SESSION['admin_error'])) {
                         <!-- Daftar buku -->
                         <div class="lg:col-span-2">
                             <div class="card overflow-hidden">
-                                <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color: var(--line-soft);">
+                                <div class="flex flex-col gap-3 px-5 py-4 border-b sm:flex-row sm:items-center sm:justify-between" style="border-color: var(--line-soft);">
                                     <div class="flex items-center gap-2">
                                         <i class="fas fa-list text-[11px]" style="color: var(--muted);"></i>
                                         <span class="text-[13px] font-semibold" style="color: var(--ink);">
@@ -620,6 +620,12 @@ if (isset($_SESSION['admin_error'])) {
                                               style="background: var(--bg); color: var(--muted);">
                                             <?= (int)$count_buku; ?>
                                         </span>
+                                    </div>
+                                    <div class="relative w-full sm:w-64">
+                                        <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px]" style="color: var(--muted);"></i>
+                                        <input type="search" id="cari-buku" class="field w-full !py-2 !pl-8"
+                                               placeholder="Cari judul, penulis, ISBN..."
+                                               aria-label="Cari buku">
                                     </div>
                                 </div>
 
@@ -658,7 +664,8 @@ if (isset($_SESSION['admin_error'])) {
                                                                         : null
                                                     ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
                                             ?>
-                                                <tr>
+                                                <tr class="baris-buku"
+                                                    data-pencarian="<?= htmlspecialchars(strtolower($b['Judul'] . ' ' . $b['Penulis'] . ' ' . $b['Kategori'] . ' ' . $b['ISBN']), ENT_QUOTES, 'UTF-8'); ?>">
                                                     <td class="tnum" style="color: var(--muted);"><?= $no++; ?></td>
                                                     <td>
                                                         <div class="flex items-center gap-3">
@@ -727,6 +734,14 @@ if (isset($_SESSION['admin_error'])) {
                                                     </td>
                                                 </tr>
                                             <?php endif; ?>
+                                            <tr id="buku-tidak-ditemukan" class="hidden">
+                                                <td colspan="5" class="py-12 text-center">
+                                                    <i class="fas fa-magnifying-glass text-2xl mb-2 block" style="color: var(--line);"></i>
+                                                    <div class="text-[12px]" style="color: var(--muted);">
+                                                        Buku tidak ditemukan.
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -1103,6 +1118,26 @@ if (isset($_SESSION['admin_error'])) {
             prev.classList.add('hidden');
             if (ph) ph.classList.remove('hidden');
         }
+    }
+
+    /* ========== Pencarian buku langsung ========== */
+    const inputCariBuku = document.getElementById('cari-buku');
+    if (inputCariBuku) {
+        const barisBuku = [...document.querySelectorAll('.baris-buku')];
+        const pesanTidakDitemukan = document.getElementById('buku-tidak-ditemukan');
+
+        inputCariBuku.addEventListener('input', () => {
+            const kataKunci = inputCariBuku.value.trim().toLocaleLowerCase('id-ID');
+            let jumlahTampil = 0;
+
+            barisBuku.forEach(baris => {
+                const cocok = baris.dataset.pencarian.toLocaleLowerCase('id-ID').includes(kataKunci);
+                baris.classList.toggle('hidden', !cocok);
+                if (cocok) jumlahTampil++;
+            });
+
+            pesanTidakDitemukan.classList.toggle('hidden', jumlahTampil > 0 || kataKunci === '');
+        });
     }
 
     /* ========== Modal Edit Buku ========== */
